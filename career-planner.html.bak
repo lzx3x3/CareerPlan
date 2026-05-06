@@ -1,0 +1,3130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🦉 职画 - Career Planner</title>
+<link rel="icon" type="image/png" href="logo-designs/A_cute_cartoon_style_app_icon__2026-05-02T14-13-50.png">
+<style>
+/* ===== 登录/注册覆盖层 ===== */
+.auth-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;
+  background:linear-gradient(135deg,#0a0a2e 0%,#1a1a4e 50%,#0d0d3d 100%);
+  display:flex;align-items:center;justify-content:center;overflow-y:auto;}
+.auth-overlay.hidden{display:none;}
+.auth-container{width:100%;max-width:420px;padding:20px;position:relative;}
+.auth-card{background:rgba(255,255,255,0.97);border-radius:24px;padding:36px 28px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(255,255,255,0.8);
+  position:relative;overflow:hidden;}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,#e8381a,#ffd700,#00aa44,#6366f1,#e8381a);}
+.auth-logo{text-align:center;margin-bottom:24px;}
+.auth-logo h1{font-size:26px;font-weight:900;color:#1a1a2e;margin:0;}
+.auth-logo p{font-size:13px;color:#888;margin-top:4px;}
+.auth-tabs{display:flex;gap:0;margin-bottom:24px;background:#f0f0f0;border-radius:12px;padding:3px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:10px;cursor:pointer;
+  font-size:14px;font-weight:700;color:#888;transition:all 0.3s;}
+.auth-tab.active{background:white;color:#e8381a;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.auth-form{display:none;}.auth-form.active{display:block;}
+.auth-input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;
+  font-size:14px;transition:all 0.2s;outline:none;margin-bottom:12px;background:white;}
+.auth-input:focus{border-color:#e8381a;box-shadow:0 0 0 3px rgba(232,56,26,0.1);}
+.auth-input::placeholder{color:#bbb;}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:900;
+  cursor:pointer;transition:all 0.2s;letter-spacing:1px;}
+.auth-btn-primary{background:linear-gradient(135deg,#e8381a,#c0280f);color:white;
+  box-shadow:0 4px 0 rgba(0,0,0,0.2);}
+.auth-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 0 rgba(0,0,0,0.2);}
+.auth-btn-primary:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.2);}
+.auth-btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.auth-btn-secondary{background:#f0f0f0;color:#666;margin-top:8px;}
+.auth-btn-secondary:hover{background:#e8e8e8;}
+.auth-divider{text-align:center;margin:16px 0;color:#ccc;font-size:12px;position:relative;}
+.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:#ddd;}
+.auth-divider::before{left:0;}.auth-divider::after{right:0;}
+.auth-msg{text-align:center;font-size:13px;padding:8px;border-radius:8px;margin-bottom:12px;display:none;}
+.auth-msg.error{display:block;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+.auth-msg.success{display:block;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
+.email-row{display:flex;gap:8px;}.email-row .auth-input{flex:1;margin-bottom:0;}
+.auth-code-btn{padding:12px 16px;border:2px solid #e8381a;border-radius:12px;
+  background:white;color:#e8381a;font-size:13px;font-weight:700;cursor:pointer;
+  white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
+.auth-code-btn:hover:not(:disabled){background:#fef2f2;}
+.auth-code-btn:disabled{border-color:#ddd;color:#bbb;cursor:not-allowed;}
+.auth-footer{text-align:center;margin-top:16px;font-size:12px;color:#aaa;}
+.auth-footer a{color:#e8381a;cursor:pointer;text-decoration:none;font-weight:600;}
+.auth-footer a:hover{text-decoration:underline;}
+/* 登录后的用户菜单 */
+.user-menu{position:relative;}
+.user-avatar-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);
+  border:2px solid rgba(255,255,255,0.5);cursor:pointer;font-size:20px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.user-avatar-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.1);}
+.user-dropdown{position:absolute;top:42px;right:0;background:white;border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);min-width:200px;padding:8px;z-index:200;display:none;
+  border:1px solid rgba(0,0,0,0.08);}
+.user-dropdown.show{display:block;animation:fadeIn 0.2s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.user-dropdown-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  cursor:pointer;font-size:13px;color:#333;transition:background 0.15s;}
+.user-dropdown-item:hover{background:#f5f5f5;}
+.user-dropdown-item.danger{color:#dc2626;}
+.user-dropdown-divider{height:1px;background:#f0f0f0;margin:4px 0;}
+/* 公司跳转链接面板 */
+.company-link-panel{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:white;border-radius:20px;padding:24px;width:90%;max-width:380px;z-index:500;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:fadeIn 0.25s;}
+.company-link-panel.show{display:block;}
+.company-link-panel .clp-title{font-size:16px;font-weight:900;color:#1a1a2e;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;}
+.company-link-panel .clp-close{position:absolute;top:16px;right:16px;width:28px;height:28px;
+  border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.company-link-panel .clp-close:hover{background:#e0e0e0;transform:scale(1.1);}
+.clp-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+  cursor:pointer;transition:all 0.2s;border:1px solid #f0f0f0;margin-bottom:6px;text-decoration:none;color:inherit;}
+.clp-link:hover{background:#f8f7ff;border-color:#6366f1;transform:translateX(4px);}
+.clp-link .clp-icon{font-size:20px;flex-shrink:0;width:32px;height:32px;border-radius:8px;
+  background:#f0f0ff;display:flex;align-items:center;justify-content:center;}
+.clp-link .clp-info{flex:1;}
+.clp-link .clp-name{font-size:13px;font-weight:700;color:#333;}
+.clp-link .clp-desc{font-size:11px;color:#888;}
+.clp-link .clp-arrow{color:#ccc;font-size:14px;}
+.panel-mask{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);
+  z-index:499;backdrop-filter:blur(4px);}
+.panel-mask.show{display:block;}
+
+/* ===== 全局变量 & 主题 ===== */
+:root {
+  --primary: #e8381a; --secondary: #ffd700; --accent: #00aa44;
+  --bg-sky: #5c94fc; --brick: #c84b0f; --white: #ffffff;
+  --dark: #2c1810; --cloud: #ffffff; --pipe: #00a841;
+  --font-main: 'Segoe UI','微软雅黑',sans-serif;
+  --shadow: 4px 4px 0px rgba(0,0,0,0.3);
+  --card-bg: rgba(255,255,255,0.97); --btn-radius: 12px;
+}
+.theme-forest{--bg-sky:#2d5a1b;--primary:#5a9e2f;--secondary:#a8d468;--accent:#ff9500;--brick:#1a4a0a;}
+.theme-ocean{--bg-sky:#0066cc;--primary:#0099ff;--secondary:#00ffcc;--accent:#ff6600;--brick:#004499;}
+.theme-night{--bg-sky:#0a0a2e;--primary:#6633cc;--secondary:#ffcc00;--accent:#ff3366;--brick:#1a0044;--cloud:#334488;}
+.theme-sakura{--bg-sky:#ffb3c6;--primary:#ff69b4;--secondary:#ff99bb;--accent:#ff4488;--brick:#cc4477;--cloud:#ffe0ec;}
+.theme-orange{--bg-sky:#ff8c00;--primary:#ff6200;--secondary:#ffe066;--accent:#00cc88;--brick:#cc4400;--cloud:#fff3cc;}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;overflow-x:hidden;transition:background 0.5s ease;user-select:none;}
+
+/* ===== 游戏背景 ===== */
+.game-world{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;z-index:0;pointer-events:none;}
+@keyframes float-clouds{0%{transform:translateX(-200px);}100%{transform:translateX(calc(100vw + 200px));}}
+.cloud{position:absolute;animation:float-clouds linear infinite;}
+.cloud-body{background:var(--cloud);border-radius:50px;opacity:0.9;position:absolute;}
+@keyframes coin-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.bg-coin{position:absolute;font-size:22px;animation:coin-float ease-in-out infinite;cursor:pointer;pointer-events:all;z-index:5;transition:transform 0.1s;}
+.bg-coin:hover{transform:scale(1.3);}
+.ground-row{position:absolute;bottom:0;left:0;right:0;height:56px;
+  background:repeating-linear-gradient(90deg,var(--brick) 0,var(--brick) 54px,#8b3a09 54px,#8b3a09 56px);
+  background-size:56px 56px;border-top:4px solid #ff8833;}
+.pipe{position:absolute;bottom:56px;width:48px;}
+.pipe-top{height:20px;background:var(--pipe);border-radius:6px 6px 0 0;border:3px solid rgba(0,0,0,0.3);margin:0 -4px;}
+.pipe-body{height:60px;background:var(--pipe);border:3px solid rgba(0,0,0,0.2);}
+/* question blocks */
+.qblock{position:absolute;width:36px;height:36px;background:linear-gradient(135deg,#e8a000,#ffd000);
+  border:3px solid rgba(0,0,0,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;pointer-events:all;z-index:5;transition:transform 0.1s;
+  box-shadow:0 4px 0 rgba(0,0,0,0.3);}
+.qblock:active{transform:translateY(4px);box-shadow:none;}
+@keyframes qblock-hit{0%{transform:translateY(0);}30%{transform:translateY(-8px);}100%{transform:translateY(0);}}
+.qblock.hit{animation:qblock-hit 0.3s ease;background:linear-gradient(135deg,#888,#aaa);}
+/* 跳出金币动画 */
+@keyframes pop-coin{0%{transform:translateY(0) scale(1);opacity:1;}100%{transform:translateY(-60px) scale(1.5);opacity:0;}}
+.pop-coin{position:absolute;font-size:24px;pointer-events:none;z-index:20;animation:pop-coin 0.6s ease forwards;}
+
+/* ===== 玩家角色 ===== */
+#player{position:fixed;bottom:56px;left:40px;font-size:44px;z-index:15;
+  transition:left 0.15s;cursor:pointer;filter:drop-shadow(2px 4px 0 rgba(0,0,0,0.3));
+  transform-origin:bottom center;}
+@keyframes jump{0%{bottom:56px;}40%{bottom:150px;}100%{bottom:56px;}}
+#player.jumping{animation:jump 0.55s cubic-bezier(0.33,1,0.68,1);}
+@keyframes run{0%,100%{transform:scaleX(1);}50%{transform:scaleX(0.9);}}
+#player.running{animation:run 0.3s ease infinite;}
+
+/* ===== 主容器 ===== */
+.app-container{position:relative;z-index:10;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ===== 顶部导航 ===== */
+.top-nav{position:sticky;top:0;z-index:100;
+  background:linear-gradient(135deg,var(--primary),#a02000);
+  padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 0 rgba(0,0,0,0.3);border-bottom:3px solid rgba(0,0,0,0.2);}
+.nav-logo{display:flex;align-items:center;gap:8px;color:white;font-weight:900;font-size:15px;text-shadow:2px 2px 0 rgba(0,0,0,0.3);}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+.nav-logo .logo-icon{font-size:26px;animation:bob 1s ease-in-out infinite;}
+.nav-back-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);
+  border:2px solid rgba(255,255,255,0.5);cursor:pointer;font-size:16px;
+  display:none;align-items:center;justify-content:center;transition:all 0.2s;
+  color:white;font-weight:bold;}
+.nav-back-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.1);}
+.nav-back-btn.visible{display:flex;}
+.nav-center{flex:1;display:flex;justify-content:center;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+/* 金币计数 */
+.coin-counter{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,0.25);
+  border-radius:20px;padding:4px 10px;border:2px solid rgba(255,215,0,0.5);}
+.coin-counter span{color:#ffd700;font-size:13px;font-weight:900;text-shadow:1px 1px 0 rgba(0,0,0,0.4);}
+/* 音效按钮 */
+.sound-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);
+  border:2px solid rgba(255,255,255,0.5);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.sound-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.1);}
+.sound-btn.muted{opacity:0.5;}
+/* 主题切换 */
+.theme-switcher{display:flex;gap:5px;}
+.theme-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,0.7);
+  transition:transform 0.2s;box-shadow:var(--shadow);}
+.theme-dot:hover,.theme-dot.active{transform:scale(1.35);border-color:white;}
+.t-default{background:#e8381a;}.t-forest{background:#5a9e2f;}.t-ocean{background:#0099ff;}
+.t-night{background:#6633cc;}.t-sakura{background:#ff69b4;}.t-orange{background:#ff6200;}
+
+/* ===== 进度条 ===== */
+.progress-bar-container{background:rgba(0,0,0,0.3);padding:8px 14px;display:flex;align-items:center;gap:10px;
+  position:sticky;top:58px;z-index:99;backdrop-filter:blur(8px);}
+.progress-track{flex:1;height:12px;background:rgba(0,0,0,0.4);border-radius:6px;overflow:visible;
+  border:2px solid rgba(255,255,255,0.3);position:relative;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--secondary),#ff9900);border-radius:6px;
+  transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+.progress-fill::after{content:'⭐';position:absolute;right:-10px;top:-10px;font-size:20px;
+  animation:spin-star 2s linear infinite;}
+@keyframes spin-star{to{transform:rotate(360deg);}}
+.progress-text{color:white;font-size:11px;font-weight:700;white-space:nowrap;text-shadow:1px 1px 0 rgba(0,0,0,0.5);}
+
+/* 步骤指示器 */
+.step-indicators{display:flex;justify-content:center;gap:7px;padding:7px 14px;background:rgba(0,0,0,0.2);}
+.step-dot{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;
+  transition:all 0.3s;color:rgba(255,255,255,0.5);font-weight:bold;background:rgba(0,0,0,0.3);}
+.step-dot.active{background:var(--secondary);border-color:white;color:var(--dark);
+  transform:scale(1.2);box-shadow:0 0 12px var(--secondary);}
+.step-dot.completed{background:var(--accent);border-color:white;color:white;}
+
+/* ===== 页面内容 ===== */
+.page-content{flex:1;padding:14px;padding-bottom:100px;}
+.screen{display:none;animation:slide-in 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+.screen.active{display:block;}
+@keyframes slide-in{from{opacity:0;transform:translateX(40px) scale(0.95);}to{opacity:1;transform:translateX(0) scale(1);}}
+
+/* ===== 卡片 ===== */
+.card{background:var(--card-bg);border-radius:20px;padding:18px;margin-bottom:14px;
+  box-shadow:0 6px 0 rgba(0,0,0,0.2),inset 0 0 0 2px rgba(255,255,255,0.6);
+  border:3px solid rgba(0,0,0,0.08);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--primary),var(--secondary),var(--accent));}
+.card-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.card-title .ti{font-size:20px;}
+
+/* ===== 欢迎屏 ===== */
+.welcome-hero{text-align:center;padding:16px 0 8px;}
+.hero-title{font-size:24px;font-weight:900;color:white;
+  text-shadow:3px 3px 0 rgba(0,0,0,0.3),0 0 20px rgba(255,215,0,0.5);margin-bottom:6px;
+  animation:title-glow 2s ease-in-out infinite;}
+@keyframes title-glow{0%,100%{text-shadow:3px 3px 0 rgba(0,0,0,0.3),0 0 20px rgba(255,215,0,0.3);}
+  50%{text-shadow:3px 3px 0 rgba(0,0,0,0.3),0 0 30px rgba(255,215,0,0.9);}}
+.hero-subtitle{font-size:13px;color:rgba(255,255,255,0.9);margin-bottom:16px;text-shadow:1px 1px 0 rgba(0,0,0,0.3);}
+/* 动物角色选择 */
+.avatar-picker{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0;}
+.avatar-opt{font-size:36px;cursor:pointer;padding:8px;border-radius:14px;border:3px solid transparent;
+  transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);background:rgba(255,255,255,0.15);}
+.avatar-opt:hover{transform:scale(1.2);}
+.avatar-opt.selected{border-color:var(--secondary);background:rgba(255,215,0,0.25);
+  transform:scale(1.15);box-shadow:0 0 12px rgba(255,215,0,0.6);}
+.hero-char{font-size:72px;display:block;animation:hero-bounce 0.6s ease-in-out infinite alternate;
+  filter:drop-shadow(0 8px 12px rgba(0,0,0,0.3));cursor:pointer;}
+@keyframes hero-bounce{from{transform:translateY(0) rotate(-4deg);}to{transform:translateY(-12px) rotate(4deg);}}
+.feature-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.feature-item{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:14px;
+  padding:12px 8px;text-align:center;border:2px solid rgba(255,255,255,0.3);
+  cursor:pointer;transition:transform 0.2s,background 0.2s;}
+.feature-item:hover{transform:translateY(-4px) scale(1.02);background:rgba(255,255,255,0.25);}
+.feature-item .feat-icon{font-size:28px;display:block;margin-bottom:4px;}
+.feature-item .feat-text{color:white;font-size:11px;font-weight:700;text-shadow:1px 1px 0 rgba(0,0,0,0.3);}
+
+/* ===== 成就/金币地图 ===== */
+.achievement-map{background:linear-gradient(135deg,#1a0a00,#3d1f00);border-radius:20px;
+  padding:18px;margin-bottom:14px;border:3px solid rgba(255,215,0,0.4);
+  box-shadow:0 0 20px rgba(255,150,0,0.2);}
+.ach-title{color:#ffd700;font-size:15px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px;
+  text-shadow:0 0 10px rgba(255,215,0,0.5);}
+.coin-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.coin-slot{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,215,0,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  background:rgba(255,215,0,0.08);transition:all 0.3s;}
+.coin-slot.earned{background:radial-gradient(circle,#ffd700,#ff9900);border-color:#ffd700;
+  box-shadow:0 0 10px rgba(255,215,0,0.7);animation:coin-shine 1.5s ease-in-out infinite;}
+@keyframes coin-shine{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.5);}50%{box-shadow:0 0 18px rgba(255,215,0,0.9);}}
+.ach-log{max-height:120px;overflow-y:auto;margin-top:10px;}
+.ach-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,215,0,0.1);
+  font-size:12px;color:rgba(255,255,255,0.8);}
+.ach-item .ai{font-size:18px;}
+
+/* ===== AI 生成加载 ===== */
+.ai-loading{text-align:center;padding:30px 0;}
+.ai-loading-spinner{width:50px;height:50px;margin:0 auto 16px;border:5px solid rgba(0,0,0,0.1);
+  border-top-color:var(--primary);border-radius:50%;animation:ai-spin 0.8s linear infinite;}
+@keyframes ai-spin{to{transform:rotate(360deg);}}
+.ai-loading-text{font-size:13px;color:#888;font-weight:600;}
+.ai-loading-text .dots::after{content:'';animation:dots 1.5s steps(4,end) infinite;}
+@keyframes dots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}}
+
+/* ===== 趣味加载区域 ===== */
+.ai-loading-fun{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 10px 14px;}
+
+/* 追尾巴小猫咪 */
+.cat-chase-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;}
+.cat-chase{position:relative;width:80px;height:80px;animation:catChase 3s linear infinite;}
+@keyframes catChase{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.cat-body{position:relative;width:100%;height:100%;}
+/* 猫头 */
+.cat-head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:44px;height:40px;
+  background:#ff8a65;border-radius:50% 50% 45% 45%;z-index:2;}
+.cat-ear{position:absolute;top:-10px;width:0;height:0;border-left:9px solid transparent;
+  border-right:9px solid transparent;border-bottom:14px solid #ff8a65;}
+.cat-ear.left{left:4px;}
+.cat-ear.right{right:4px;}
+.cat-face{position:relative;top:14px;}
+.cat-eye{position:absolute;top:2px;width:8px;height:9px;background:#333;border-radius:50%;
+  animation:catBlink 4s infinite;}
+.cat-eye.left{left:11px;}
+.cat-eye.right{right:11px;}
+@keyframes catBlink{0%,45%,55%,100%{height:9px;}50%{height:1px;}}
+.cat-nose{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:6px;height:4px;
+  background:#e64a19;border-radius:50%;}
+.cat-mouth{position:absolute;top:15px;left:50%;transform:translateX(-50%);width:12px;height:5px;
+  border-bottom:2px solid #e64a19;border-radius:0 0 50% 50%;}
+/* 猫尾巴 */
+.cat-tail-wrap{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:70px;height:70px;}
+.cat-tail{position:absolute;bottom:0;right:0;width:28px;height:28px;
+  border-bottom:4px solid #ff8a65;border-right:4px solid #ff8a65;
+  border-radius:0 0 50% 0;transform-origin:0% 0%;animation:tailWag 0.4s ease-in-out infinite alternate;}
+@keyframes tailWag{0%{transform:rotate(-20deg);}100%{transform:rotate(20deg);}}
+.cat-paw{position:absolute;bottom:-2px;right:-2px;width:14px;height:10px;background:#ff8a65;
+  border-radius:50% 50% 30% 30%;}
+.cat-thought{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);font-size:11px;
+  color:#ff8a65;font-weight:700;white-space:nowrap;animation:thought 2s ease-in-out infinite;}
+@keyframes thought{0%,100%{opacity:0.5;transform:translateX(-50%) translateY(0);}
+  50%{opacity:1;transform:translateX(-50%) translateY(-4px);}}
+
+/* 小恐龙游戏 */
+.mini-game-wrap{width:100%;max-width:340px;text-align:center;}
+.mini-game-title{font-size:13px;font-weight:700;color:#555;margin-bottom:8px;}
+.mini-game-hint{font-size:11px;color:#aaa;margin-top:6px;}
+.mini-game-score{font-size:12px;font-weight:700;color:#6366f1;margin-top:4px;}
+#dinoGame{display:block;margin:0 auto;border-radius:10px;background:#f8f9ff;
+  border:2px solid rgba(99,102,241,0.15);}
+.ai-powered-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;margin-left:6px;
+  box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+.api-settings-card{background:linear-gradient(135deg,#f0f4ff,#e8eeff);border:2px solid #c7d2fe;
+  border-radius:16px;padding:14px;margin-bottom:14px;}
+.api-settings-card .card-title{color:#4338ca;}
+.api-input-group{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.api-input-group input{flex:1;}
+.api-key-input{font-size:12px;padding:9px 12px;border-radius:10px;border:2px solid #c7d2fe;
+  background:white;color:#333;font-family:monospace;}
+.api-key-input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.api-key-input::placeholder{color:#aab;font-family:var(--font-main);}
+.api-test-btn{padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s;
+  box-shadow:0 3px 0 rgba(99,102,241,0.3);}
+.api-test-btn:active{transform:translateY(2px);box-shadow:none;}
+.api-hint{font-size:11px;color:#888;margin-top:8px;line-height:1.5;}
+.api-hint a{color:#6366f1;text-decoration:none;font-weight:600;}
+.ai-error{background:#fff2f0;border:2px solid #fecaca;border-radius:12px;padding:12px;
+  margin:10px 0;color:#dc2626;font-size:12px;font-weight:600;text-align:center;}
+.ai-suggestion-card{background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04));
+  border:2px solid rgba(99,102,241,0.2);border-radius:14px;padding:12px;margin-bottom:10px;}
+.ai-suggestion-card .sug-title{font-size:14px;font-weight:800;color:#4338ca;margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;}
+.ai-suggestion-card .sug-text{font-size:12px;color:#555;line-height:1.7;white-space:pre-wrap;}
+.ai-company-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.ai-company-item{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:white;border-radius:10px;border:1px solid rgba(0,0,0,0.06);transition:all 0.2s;}
+.ai-company-item:hover{border-color:#6366f1;transform:translateX(4px);}
+.ai-company-item .ci-logo{font-size:24px;flex-shrink:0;}
+.ai-company-item .ci-info{flex:1;}
+.ai-company-item .ci-name{font-size:13px;font-weight:700;color:#333;}
+.ai-company-item .ci-desc{font-size:11px;color:#888;margin-top:2px;}
+.ai-company-item .ci-tag{font-size:10px;padding:2px 8px;border-radius:8px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;font-weight:600;flex-shrink:0;}
+
+/* ===== 按钮 ===== */
+.btn-primary{background:linear-gradient(135deg,var(--primary),#c0280f);color:white;border:none;
+  padding:13px 28px;border-radius:var(--btn-radius);font-size:15px;font-weight:900;cursor:pointer;
+  width:100%;margin-top:8px;box-shadow:0 5px 0 rgba(0,0,0,0.3);transition:all 0.15s;
+  text-shadow:1px 1px 0 rgba(0,0,0,0.3);letter-spacing:1px;position:relative;overflow:hidden;}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:left 0.4s;}
+.btn-primary:hover::before{left:100%;}
+.btn-primary:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.3);}
+.btn-secondary{background:linear-gradient(135deg,#888,#666);color:white;border:none;
+  padding:11px 22px;border-radius:var(--btn-radius);font-size:13px;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;}
+.btn-secondary:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.2);}
+
+/* ===== 标签选择 ===== */
+.tag-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.tag-item{padding:7px 13px;border-radius:20px;border:2px solid #ddd;background:#f8f8f8;
+  font-size:12px;cursor:pointer;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  color:#555;font-weight:600;user-select:none;}
+.tag-item:hover{border-color:var(--primary);background:rgba(232,56,26,0.06);color:var(--primary);transform:scale(1.05);}
+.tag-item.selected{background:linear-gradient(135deg,var(--primary),#ff6633);border-color:var(--primary);
+  color:white;transform:scale(1.05);box-shadow:0 3px 0 rgba(0,0,0,0.2);}
+.tag-item.selected::after{content:' ✓';}
+/* ===== 自定义标签 + 按钮 ===== */
+.tag-add-btn{padding:7px 13px;border-radius:20px;border:2px dashed #ccc;background:#fafafa;
+  font-size:16px;cursor:pointer;transition:all 0.2s;color:#999;font-weight:700;line-height:1;
+  display:flex;align-items:center;justify-content:center;min-width:36px;min-height:32px;}
+.tag-add-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(232,56,26,0.05);transform:scale(1.08);}
+.tag-add-input{padding:5px 10px;border-radius:20px;border:2px solid var(--primary);
+  font-size:12px;width:100px;outline:none;background:white;box-shadow:0 0 0 3px rgba(232,56,26,0.12);}
+.tag-add-input::placeholder{color:#bbb;}
+.tag-item.custom-tag{position:relative;padding-right:26px;}
+.tag-item.custom-tag .tag-remove{position:absolute;top:-4px;right:-4px;width:16px;height:16px;
+  border-radius:50%;background:#ff4444;color:white;font-size:10px;line-height:16px;text-align:center;
+  cursor:pointer;display:none;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  transition:transform 0.15s;}
+.tag-item.custom-tag:hover .tag-remove{display:block;}
+.tag-item.custom-tag .tag-remove:hover{transform:scale(1.3);background:#cc0000;}
+
+/* ===== 城市切换 ===== */
+.city-tabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.city-tab{padding:5px 10px;border-radius:7px;background:rgba(0,0,0,0.08);border:none;
+  font-size:11px;cursor:pointer;color:#666;font-weight:600;transition:all 0.2s;}
+.city-tab.active{background:var(--primary);color:white;box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+.city-group{display:none;}.city-group.active{display:flex;flex-wrap:wrap;gap:7px;}
+
+/* ===== MBTI ===== */
+.question-card{background:var(--card-bg);border-radius:20px;padding:20px;margin-bottom:14px;
+  box-shadow:0 6px 0 rgba(0,0,0,0.2);border:3px solid rgba(0,0,0,0.08);
+  animation:question-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes question-pop{from{opacity:0;transform:scale(0.8) rotate(-3deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+.q-num{font-size:11px;color:var(--primary);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.q-text{font-size:15px;font-weight:800;color:var(--dark);line-height:1.5;margin-bottom:16px;}
+.answer-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.answer-btn{padding:13px 9px;border-radius:13px;border:3px solid #e0e0e0;background:#f8f8f8;
+  font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  text-align:center;color:#555;line-height:1.4;}
+.answer-btn:hover{border-color:var(--primary);background:rgba(232,56,26,0.05);color:var(--primary);transform:scale(1.03);}
+.answer-btn.sel-a{background:linear-gradient(135deg,#3366ff,#6699ff);border-color:#3366ff;color:white;transform:scale(1.03);box-shadow:0 3px 0 rgba(0,0,100,0.2);}
+.answer-btn.sel-b{background:linear-gradient(135deg,var(--accent),#00cc55);border-color:var(--accent);color:white;transform:scale(1.03);}
+.mbti-result{text-align:center;padding:16px;}
+.mbti-type{font-size:56px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:type-reveal 0.8s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes type-reveal{from{opacity:0;transform:scale(0.3) rotate(10deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+.mbti-char{font-size:88px;display:block;margin:12px auto;animation:char-bounce 0.5s ease-in-out infinite alternate;}
+@keyframes char-bounce{from{transform:translateY(0) scale(1);}to{transform:translateY(-10px) scale(1.05);}}
+.mbti-desc{background:linear-gradient(135deg,rgba(255,215,0,0.18),rgba(255,100,0,0.08));
+  border-radius:14px;padding:14px;margin:10px 0;border:2px solid rgba(255,215,0,0.5);}
+.career-badges{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px;}
+.career-badge{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;
+  animation:badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) backwards;}
+@keyframes badge-pop{from{opacity:0;transform:scale(0);}to{opacity:1;transform:scale(1);}}
+
+/* ===== 简历表单 ===== */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.form-input{width:100%;padding:11px 14px;border-radius:11px;border:3px solid #e0e0e0;font-size:13px;
+  background:#fafafa;transition:border-color 0.2s,box-shadow 0.2s;color:#333;font-family:var(--font-main);}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(232,56,26,0.12);background:white;}
+.form-select{width:100%;padding:11px 14px;border-radius:11px;border:3px solid #e0e0e0;font-size:13px;
+  background:#fafafa;cursor:pointer;color:#333;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath fill='%23666' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;font-family:var(--font-main);}
+.form-select:focus{outline:none;border-color:var(--primary);}
+.experience-list{display:flex;flex-direction:column;gap:9px;}
+.exp-item{background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,100,0,0.05));
+  border-radius:13px;padding:12px;border:2px solid rgba(255,215,0,0.4);}
+.exp-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+.exp-title-input{font-weight:700;color:var(--dark);font-size:13px;flex:1;border:none;background:transparent;
+  padding:0;font-family:var(--font-main);}
+.exp-remove{background:rgba(232,56,26,0.1);border:none;border-radius:50%;width:22px;height:22px;
+  cursor:pointer;color:var(--primary);font-size:13px;display:flex;align-items:center;justify-content:center;}
+.add-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;
+  border-radius:11px;border:2px dashed #ddd;background:transparent;cursor:pointer;
+  color:#888;font-size:12px;font-weight:600;width:100%;transition:all 0.2s;}
+.add-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(232,56,26,0.05);}
+
+/* ===== 横向职业闯关路径图 ===== */
+.roadmap-scroll-wrap{overflow-x:auto;padding:20px 10px 30px;-webkit-overflow-scrolling:touch;}
+.roadmap-scroll-wrap::-webkit-scrollbar{height:6px;}
+.roadmap-scroll-wrap::-webkit-scrollbar-track{background:rgba(0,0,0,0.1);border-radius:3px;}
+.roadmap-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.5);border-radius:3px;}
+.roadmap-track-h{position:relative;display:flex;align-items:flex-end;gap:0;
+  min-width:max-content;padding:60px 20px 20px;}
+/* 地面 */
+.rm-ground{position:absolute;bottom:0;left:0;right:0;height:24px;
+  background:repeating-linear-gradient(90deg,#8b6914 0,#8b6914 46px,#6b4f10 46px,#6b4f10 48px);
+  border-top:3px solid #c8930a;border-radius:0 0 10px 10px;}
+/* 连接线（道路） */
+.rm-road{position:absolute;bottom:24px;left:60px;right:60px;height:8px;
+  background:linear-gradient(90deg,var(--secondary),var(--primary),var(--accent),var(--secondary));
+  border-radius:4px;box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+/* 路标节点 */
+.rm-node{position:relative;display:flex;flex-direction:column;align-items:center;
+  width:90px;cursor:pointer;flex-shrink:0;}
+.rm-node-inner{width:56px;height:56px;border-radius:50%;border:4px solid white;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);position:relative;z-index:2;
+  box-shadow:0 5px 0 rgba(0,0,0,0.25),0 0 0 3px rgba(255,255,255,0.4);}
+.rm-node-inner:hover{transform:scale(1.18) translateY(-5px);box-shadow:0 8px 0 rgba(0,0,0,0.2),0 0 16px rgba(255,215,0,0.6);}
+.rm-node.done .rm-node-inner{background:linear-gradient(135deg,#ffd700,#ff9900)!important;
+  box-shadow:0 5px 0 rgba(0,0,0,0.25),0 0 20px rgba(255,215,0,0.7);}
+.rm-node.done .rm-node-inner::after{content:'🪙';position:absolute;top:-20px;right:-10px;font-size:18px;
+  animation:coin-float 1.2s ease-in-out infinite;}
+.rm-node.locked .rm-node-inner{filter:grayscale(0.7) brightness(0.7);cursor:not-allowed;}
+.rm-node-label{font-size:10px;font-weight:800;color:white;text-align:center;margin-top:6px;
+  text-shadow:1px 1px 0 rgba(0,0,0,0.5);max-width:80px;line-height:1.3;}
+.rm-node-time{font-size:9px;color:rgba(255,255,255,0.7);margin-top:2px;}
+/* 路标之间的连接点 */
+.rm-connector{width:30px;height:8px;display:flex;align-items:center;justify-content:center;
+  position:relative;bottom:52px;flex-shrink:0;}
+.rm-connector::before{content:'';width:100%;height:4px;background:rgba(255,255,255,0.4);
+  border-radius:2px;display:block;}
+.rm-connector.done-conn::before{background:linear-gradient(90deg,#ffd700,#ff9900);}
+/* 路标旗杆 */
+.rm-flag{position:absolute;top:-28px;right:-8px;font-size:16px;animation:flag-wave 1s ease-in-out infinite alternate;}
+@keyframes flag-wave{from{transform:rotate(-5deg);}to{transform:rotate(5deg);}}
+/* 小马里奥人在路线上 */
+.rm-runner{position:absolute;bottom:26px;font-size:28px;transition:left 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  filter:drop-shadow(2px 2px 0 rgba(0,0,0,0.3));z-index:10;}
+@keyframes rm-run{0%,100%{transform:scaleX(1);}50%{transform:scaleX(0.88);}}
+.rm-runner.moving{animation:rm-run 0.3s ease infinite;}
+
+/* ===== 路标打卡弹窗 ===== */
+.checkin-modal{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;
+  display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.checkin-modal.open{opacity:1;pointer-events:all;}
+.checkin-sheet{background:white;border-radius:24px 24px 0 0;padding:22px 18px 40px;
+  width:100%;max-width:480px;transform:translateY(100%);
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);max-height:85vh;overflow-y:auto;}
+.checkin-modal.open .checkin-sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px;}
+.checkin-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.checkin-icon{font-size:36px;}
+.checkin-title{font-size:16px;font-weight:900;color:var(--dark);}
+.checkin-subtitle{font-size:12px;color:#888;margin-top:2px;}
+/* 金币奖励动画 */
+@keyframes coin-reward{0%{transform:scale(0) rotate(-180deg);opacity:0;}
+  60%{transform:scale(1.3) rotate(10deg);opacity:1;}100%{transform:scale(1) rotate(0);opacity:1;}}
+.coin-reward-anim{animation:coin-reward 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;display:inline-block;}
+
+/* ===== 发展建议 ===== */
+.advice-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;
+  border-bottom:1px solid rgba(0,0,0,0.07);}
+.advice-item:last-child{border-bottom:none;}
+.advice-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.advice-content strong{display:block;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:3px;}
+.advice-content p{font-size:12px;color:#666;line-height:1.5;}
+.summary-section{background:linear-gradient(135deg,var(--primary),#c0280f);border-radius:18px;
+  padding:18px;color:white;margin-bottom:14px;box-shadow:0 6px 0 rgba(0,0,0,0.2);text-align:center;}
+
+/* ===== 吐司 ===== */
+.toast{position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:var(--dark);color:white;padding:9px 18px;border-radius:18px;font-size:13px;
+  font-weight:700;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== 通用工具 ===== */
+.fade-in{animation:fadeIn 0.5s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.pixel-text{font-family:'Courier New',monospace;font-weight:900;letter-spacing:2px;text-transform:uppercase;}
+.section-title-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:0 2px;}
+.section-emoji{font-size:26px;filter:drop-shadow(2px 2px 0 rgba(0,0,0,0.2));}
+.section-title{font-size:18px;font-weight:900;color:white;text-shadow:2px 2px 0 rgba(0,0,0,0.3);flex:1;}
+.section-badge{background:var(--secondary);color:var(--dark);font-size:10px;font-weight:800;
+  padding:2px 9px;border-radius:9px;box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+.shake{animation:shake 0.4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+/* 飞行金币特效 */
+@keyframes fly-coin{0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0.5);opacity:0;}}
+.fly-coin{position:fixed;font-size:22px;pointer-events:none;z-index:999;
+  animation:fly-coin 0.8s cubic-bezier(0.33,1,0.68,1) forwards;}
+/* 蘑菇拾取 */
+@keyframes mushroom-collect{0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(0);opacity:0;}}
+.bg-mushroom{position:absolute;font-size:24px;cursor:pointer;pointer-events:all;z-index:5;
+  animation:coin-float 2.5s ease-in-out infinite;transition:transform 0.1s;}
+.bg-mushroom:hover{transform:scale(1.2);}
+/* 超级蘑菇提示 */
+.powerup-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  background:linear-gradient(135deg,#e8381a,#ffd700);color:white;
+  padding:20px 32px;border-radius:20px;font-size:20px;font-weight:900;z-index:998;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);text-align:center;text-shadow:2px 2px 0 rgba(0,0,0,0.3);
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;}
+.powerup-banner.show{transform:translate(-50%,-50%) scale(1);}
+
+@media(max-width:360px){.answer-options{grid-template-columns:1fr;}.feature-cards{grid-template-columns:1fr;}}
+</style>
+</head>
+
+<body id="appBody">
+
+<!-- ===== 登录/注册覆盖层 ===== -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>🦉 职画</h1>
+        <p>你的专属职业规划主理人</p>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin">🔐 登录</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')" id="tabRegister">📝 注册</div>
+        <div class="auth-tab" onclick="switchAuthTab('email')" id="tabEmail">📧 邮箱</div>
+      </div>
+      <div class="auth-msg" id="authMsg"></div>
+      <!-- 用户名密码登录 -->
+      <div class="auth-form active" id="formLogin">
+        <input class="auth-input" id="loginUsername" type="text" placeholder="用户名" autocomplete="username">
+        <input class="auth-input" id="loginPassword" type="password" placeholder="密码" autocomplete="current-password">
+        <button class="auth-btn auth-btn-primary" onclick="handleLogin()">🚀 登录</button>
+        <div class="auth-footer">还没有账号？<a onclick="switchAuthTab('register')">立即注册</a></div>
+      </div>
+      <!-- 用户名密码注册 -->
+      <div class="auth-form" id="formRegister">
+        <input class="auth-input" id="regUsername" type="text" placeholder="用户名（3-20个字符）" autocomplete="off">
+        <input class="auth-input" id="regPassword" type="password" placeholder="密码（至少6位）" autocomplete="new-password">
+        <input class="auth-input" id="regPassword2" type="password" placeholder="确认密码" autocomplete="new-password">
+        <input class="auth-input" id="regEmail" type="email" placeholder="邮箱（选填，可用于找回密码）" autocomplete="email">
+        <button class="auth-btn auth-btn-primary" onclick="handleRegister()">📝 注册</button>
+        <div class="auth-footer">已有账号？<a onclick="switchAuthTab('login')">去登录</a></div>
+      </div>
+      <!-- 邮箱验证码登录 -->
+      <div class="auth-form" id="formEmail">
+        <input class="auth-input" id="emailAddr" type="email" placeholder="输入邮箱地址" autocomplete="email">
+        <div class="email-row" style="margin-bottom:12px;">
+          <input class="auth-input" id="emailCode" type="text" placeholder="6位验证码" maxlength="6" autocomplete="one-time-code">
+          <button class="auth-code-btn" id="sendCodeBtn" onclick="handleSendCode()">发送验证码</button>
+        </div>
+        <button class="auth-btn auth-btn-primary" onclick="handleEmailLogin()">📧 登录 / 注册</button>
+        <div class="auth-footer">首次使用邮箱将自动创建账号</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 公司跳转链接面板 ===== -->
+<div class="panel-mask" id="clpMask" onclick="closeCompanyLinks()"></div>
+<div class="company-link-panel" id="companyLinkPanel">
+  <button class="clp-close" onclick="closeCompanyLinks()">✕</button>
+  <div class="clp-title" id="clpTitle">🏢 查看招聘信息</div>
+  <div id="clpLinks"></div>
+</div>
+
+<!-- ===== 游戏背景 ===== -->
+<div class="game-world" id="gameWorld">
+  <!-- 云 -->
+  <div class="cloud" style="top:55px;animation-duration:22s;animation-delay:0s;">
+    <div class="cloud-body" style="left:0;top:14px;width:110px;height:24px;"></div>
+    <div class="cloud-body" style="left:20px;top:0;width:72px;height:36px;"></div>
+  </div>
+  <div class="cloud" style="top:110px;animation-duration:28s;animation-delay:-9s;">
+    <div class="cloud-body" style="left:0;top:10px;width:80px;height:18px;"></div>
+    <div class="cloud-body" style="left:14px;top:0;width:52px;height:28px;"></div>
+  </div>
+  <!-- 管道 -->
+  <div class="pipe" style="right:60px;bottom:56px;">
+    <div class="pipe-top"></div><div class="pipe-body"></div>
+  </div>
+  <div class="pipe" style="left:10px;bottom:56px;">
+    <div class="pipe-top"></div><div class="pipe-body" style="height:40px;"></div>
+  </div>
+  <!-- 问号砖块 -->
+  <div class="qblock" id="qb1" style="top:38%;left:30%;" onclick="hitQBlock(this,1)">❓</div>
+  <div class="qblock" id="qb2" style="top:28%;left:55%;" onclick="hitQBlock(this,2)">❓</div>
+  <div class="qblock" id="qb3" style="top:45%;right:15%;" onclick="hitQBlock(this,3)">❓</div>
+  <!-- 背景金币 -->
+  <div class="bg-coin" style="top:32%;left:18%;animation-delay:0.2s;" onclick="collectBgCoin(this)">🪙</div>
+  <div class="bg-coin" style="top:50%;left:42%;animation-delay:0.9s;" onclick="collectBgCoin(this)">🪙</div>
+  <div class="bg-coin" style="top:36%;right:22%;animation-delay:1.6s;" onclick="collectBgCoin(this)">🪙</div>
+  <!-- 背景蘑菇 -->
+  <div class="bg-mushroom" style="top:58%;left:25%;animation-delay:0.5s;" onclick="collectMushroom(this)">🍄</div>
+  <div class="bg-mushroom" style="top:62%;right:18%;animation-delay:1.3s;" onclick="collectMushroom(this)">🍄</div>
+  <!-- 地面 -->
+  <div class="ground-row"></div>
+</div>
+
+<!-- 玩家角色 -->
+<div id="player" onclick="playerJump()" title="点我跳跃！">🧑‍🎓</div>
+
+<!-- 超级蘑菇横幅 -->
+<div class="powerup-banner" id="powerupBanner">
+  🍄 超级加倍！<br><span style="font-size:14px;opacity:0.9;">接下来获得的金币×2</span>
+</div>
+
+<!-- 金币飞入导航计数动画占位 -->
+<div id="flyCoinsContainer"></div>
+
+<!-- ===== APP 主容器 ===== -->
+<div class="app-container">
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <button class="nav-back-btn" id="navBackBtn" onclick="goPrevStep()" title="返回上一步">←</button>
+    <div class="nav-logo nav-center">
+      <img class="logo-icon" src="logo-designs/A_cute_cartoon_style_app_icon__2026-05-02T14-13-50.png" alt="职画" style="width:30px;height:30px;border-radius:8px;animation:bob 1s ease-in-out infinite;">
+      <span class="pixel-text" style="font-size:12px;">职画</span>
+    </div>
+    <div class="nav-right">
+      <div class="coin-counter">
+        <span>🪙</span>
+        <span id="coinScore">0</span>
+      </div>
+      <button class="sound-btn" id="soundBtn" onclick="toggleSound()" title="开关音效">🔊</button>
+      <div class="theme-switcher">
+        <div class="theme-dot t-default active" onclick="setTheme('',this)" title="经典红"></div>
+        <div class="theme-dot t-orange" onclick="setTheme('theme-orange',this)" title="橙色"></div>
+        <div class="theme-dot t-forest" onclick="setTheme('theme-forest',this)" title="森林"></div>
+        <div class="theme-dot t-ocean" onclick="setTheme('theme-ocean',this)" title="海洋"></div>
+        <div class="theme-dot t-night" onclick="setTheme('theme-night',this)" title="夜空"></div>
+        <div class="theme-dot t-sakura" onclick="setTheme('theme-sakura',this)" title="樱花"></div>
+      </div>
+      <!-- 用户菜单（登录后显示） -->
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <button class="user-avatar-btn" onclick="toggleUserDropdown()" id="userAvatarBtn">🧑</button>
+        <div class="user-dropdown" id="userDropdown">
+          <div style="padding:10px 12px 6px;font-size:11px;color:#aaa;" id="dropdownUserInfo"></div>
+          <div class="user-dropdown-item" onclick="handleLogout()">🚪 退出登录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 进度条 -->
+  <div class="progress-bar-container">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:5%"></div>
+    </div>
+    <div class="progress-text" id="progressText">第 1/5 步</div>
+  </div>
+  <!-- 步骤点 -->
+  <div class="step-indicators">
+    <div class="step-dot active" id="sdot-0" onclick="goToStep(0)">🏠</div>
+    <div class="step-dot" id="sdot-1" onclick="goToStep(1)">🎯</div>
+    <div class="step-dot" id="sdot-2" onclick="goToStep(2)">🧠</div>
+    <div class="step-dot" id="sdot-3" onclick="goToStep(3)">📋</div>
+    <div class="step-dot" id="sdot-4" onclick="goToStep(4)">🗺️</div>
+  </div>
+
+  <div class="page-content">
+
+  <!-- ===== 屏幕0：欢迎 ===== -->
+  <div class="screen active" id="screen-0">
+    <div class="welcome-hero fade-in">
+      <div class="section-title-bar" style="justify-content:center;">
+        <span class="section-emoji">🦉</span>
+        <span class="hero-title pixel-text" style="font-size:20px;">职画</span>
+        <span class="section-emoji">🎓</span>
+      </div>
+      <p class="hero-subtitle">你的专属职业规划主理人 · 从大学到梦想工作</p>
+      <!-- 动物角色选择 -->
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:8px;">选择你的冒险角色 👇</div>
+      <div class="avatar-picker" id="avatarPicker">
+        <div class="avatar-opt selected" data-char="🧑‍🎓" onclick="selectAvatar(this)">🧑‍🎓</div>
+        <div class="avatar-opt" data-char="🐼" onclick="selectAvatar(this)">🐼</div>
+        <div class="avatar-opt" data-char="🦊" onclick="selectAvatar(this)">🦊</div>
+        <div class="avatar-opt" data-char="🐸" onclick="selectAvatar(this)">🐸</div>
+        <div class="avatar-opt" data-char="🐯" onclick="selectAvatar(this)">🐯</div>
+        <div class="avatar-opt" data-char="🦁" onclick="selectAvatar(this)">🦁</div>
+        <div class="avatar-opt" data-char="🐨" onclick="selectAvatar(this)">🐨</div>
+        <div class="avatar-opt" data-char="🐙" onclick="selectAvatar(this)">🐙</div>
+      </div>
+      <span class="hero-char" id="heroCharDisplay">🧑‍🎓</span>
+    </div>
+    <!-- 成就地图（轻量展示） -->
+    <div class="achievement-map fade-in" style="animation-delay:0.1s;">
+      <div class="ach-title">🪙 我的金币成就</div>
+      <div class="coin-grid" id="coinGrid">
+        <!-- 动态生成20个金币槽 -->
+      </div>
+      <div class="ach-log" id="achLog">
+        <div style="color:rgba(255,255,255,0.4);font-size:12px;text-align:center;padding:8px;">完成路标打卡可获得金币 ✨</div>
+      </div>
+    </div>
+    <div class="feature-cards fade-in" style="animation-delay:0.15s;">
+      <div class="feature-item" onclick="goToStep(1)"><span class="feat-icon">🎯</span><span class="feat-text">职业目标</span></div>
+      <div class="feature-item" onclick="goToStep(2)"><span class="feat-icon">🧠</span><span class="feat-text">MBTI测评</span></div>
+      <div class="feature-item" onclick="goToStep(3)"><span class="feat-icon">📋</span><span class="feat-text">简历信息</span></div>
+      <div class="feature-item" onclick="goToStep(4)"><span class="feat-icon">🗺️</span><span class="feat-text">路径地图</span></div>
+    </div>
+    <div style="color:rgba(255,255,255,0.7);font-size:11px;text-align:center;margin:10px 0;">
+      💡 点击背景金币🪙和问号砖块❓可以收集金币！角色可以点击跳跃🕹️
+    </div>
+    <button class="btn-primary" onclick="goToStep(1)" style="margin-top:8px;">🚀 开始我的职业冒险！</button>
+  </div>
+
+  <!-- ===== 屏幕1：职业方向 ===== -->
+  <div class="screen" id="screen-1">
+    <div class="section-title-bar">
+      <span class="section-emoji">🎯</span>
+      <span class="section-title">职业方向设定</span>
+      <span class="section-badge">STEP 1</span>
+    </div>
+    <div class="card fade-in">
+      <div class="card-title"><span class="ti">🏭</span>想去哪个行业？<small style="color:#aaa;font-size:11px;margin-left:4px;">(多选)</small></div>
+      <div class="tag-grid" id="industryTags">
+        <div class="tag-item" data-val="finance" onclick="toggleTag(this,'industry')">💰 金融</div>
+        <div class="tag-item" data-val="internet" onclick="toggleTag(this,'industry')">🌐 互联网</div>
+        <div class="tag-item" data-val="ai" onclick="toggleTag(this,'industry')">🤖 人工智能</div>
+        <div class="tag-item" data-val="robot" onclick="toggleTag(this,'industry')">🦾 机器人</div>
+        <div class="tag-item" data-val="material" onclick="toggleTag(this,'industry')">🔬 材料科学</div>
+        <div class="tag-item" data-val="biotech" onclick="toggleTag(this,'industry')">🧬 生物医药</div>
+        <div class="tag-item" data-val="energy" onclick="toggleTag(this,'industry')">⚡ 新能源</div>
+        <div class="tag-item" data-val="auto" onclick="toggleTag(this,'industry')">🚗 新能源汽车</div>
+        <div class="tag-item" data-val="edu" onclick="toggleTag(this,'industry')">📚 教育培训</div>
+        <div class="tag-item" data-val="ecommerce" onclick="toggleTag(this,'industry')">🛒 电商</div>
+        <div class="tag-item" data-val="consult" onclick="toggleTag(this,'industry')">📊 咨询管理</div>
+        <div class="tag-item" data-val="chip" onclick="toggleTag(this,'industry')">💻 芯片半导体</div>
+        <div class="tag-item" data-val="space" onclick="toggleTag(this,'industry')">🚀 航空航天</div>
+        <div class="tag-item" data-val="media" onclick="toggleTag(this,'industry')">📱 新媒体</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'industry')" title="自定义行业">+</div>
+      </div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.08s;">
+      <div class="card-title"><span class="ti">💼</span>倾向岗位类型？<small style="color:#aaa;font-size:11px;margin-left:4px;">(多选)</small></div>
+      <div class="tag-grid" id="jobTags">
+        <div class="tag-item" data-val="rd" onclick="toggleTag(this,'job')">🔧 研发/技术</div>
+        <div class="tag-item" data-val="product" onclick="toggleTag(this,'job')">🎨 产品设计</div>
+        <div class="tag-item" data-val="ops" onclick="toggleTag(this,'job')">⚙️ 运营</div>
+        <div class="tag-item" data-val="sales" onclick="toggleTag(this,'job')">📣 市场/销售</div>
+        <div class="tag-item" data-val="finance_pos" onclick="toggleTag(this,'job')">💹 财务/会计</div>
+        <div class="tag-item" data-val="research" onclick="toggleTag(this,'job')">🔭 科研/学术</div>
+        <div class="tag-item" data-val="data" onclick="toggleTag(this,'job')">📈 数据分析</div>
+        <div class="tag-item" data-val="manage" onclick="toggleTag(this,'job')">🗂️ 项目管理</div>
+        <div class="tag-item" data-val="civil" onclick="toggleTag(this,'job')">🏛️ 公务员</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'job')" title="自定义岗位">+</div>
+      </div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.12s;">
+      <div class="card-title"><span class="ti">🏢</span>心仪公司类型？<small style="color:#aaa;font-size:11px;margin-left:4px;">(多选)</small></div>
+      <div class="tag-grid" id="companyTags">
+        <div class="tag-item" data-val="bigtech" onclick="toggleTag(this,'company')">🦄 互联网大厂</div>
+        <div class="tag-item" data-val="soe" onclick="toggleTag(this,'company')">🏛️ 国有企业</div>
+        <div class="tag-item" data-val="private" onclick="toggleTag(this,'company')">🏪 民营企业</div>
+        <div class="tag-item" data-val="startup" onclick="toggleTag(this,'company')">🚀 初创公司</div>
+        <div class="tag-item" data-val="gov" onclick="toggleTag(this,'company')">🏛️ 政府机构</div>
+        <div class="tag-item" data-val="public" onclick="toggleTag(this,'company')">🏥 事业单位</div>
+        <div class="tag-item" data-val="foreign" onclick="toggleTag(this,'company')">🌏 外资企业</div>
+        <div class="tag-item" data-val="research_inst" onclick="toggleTag(this,'company')">🔬 科研院所</div>
+        <div class="tag-item" data-val="academia" onclick="toggleTag(this,'company')">🎓 高校教职</div>
+        <div class="tag-item" data-val="freelance" onclick="toggleTag(this,'company')">🎭 自由职业</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'company')" title="自定义公司类型">+</div>
+      </div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.16s;">
+      <div class="card-title"><span class="ti">🗺️</span>期望就业城市？<small style="color:#aaa;font-size:11px;margin-left:4px;">(多选)</small></div>
+      <div class="city-tabs">
+        <button class="city-tab active" onclick="switchCityGroup(this,'tier1')">一线</button>
+        <button class="city-tab" onclick="switchCityGroup(this,'tier2')">新一线</button>
+        <button class="city-tab" onclick="switchCityGroup(this,'tier3')">其他</button>
+        <button class="city-tab" onclick="switchCityGroup(this,'abroad')">海外</button>
+      </div>
+      <div class="city-group active" id="city-tier1">
+        <div class="tag-item" data-val="beijing" onclick="toggleTag(this,'city')">🏮 北京</div>
+        <div class="tag-item" data-val="shanghai" onclick="toggleTag(this,'city')">🌆 上海</div>
+        <div class="tag-item" data-val="guangzhou" onclick="toggleTag(this,'city')">🌸 广州</div>
+        <div class="tag-item" data-val="shenzhen" onclick="toggleTag(this,'city')">⚡ 深圳</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'city')" title="自定义城市">+</div>
+      </div>
+      <div class="city-group" id="city-tier2">
+        <div class="tag-item" data-val="hangzhou" onclick="toggleTag(this,'city')">☕ 杭州</div>
+        <div class="tag-item" data-val="chengdu" onclick="toggleTag(this,'city')">🐼 成都</div>
+        <div class="tag-item" data-val="wuhan" onclick="toggleTag(this,'city')">🌸 武汉</div>
+        <div class="tag-item" data-val="nanjing" onclick="toggleTag(this,'city')">💫 南京</div>
+        <div class="tag-item" data-val="xian" onclick="toggleTag(this,'city')">🏯 西安</div>
+        <div class="tag-item" data-val="chongqing" onclick="toggleTag(this,'city')">🌶️ 重庆</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'city')" title="自定义城市">+</div>
+      </div>
+      <div class="city-group" id="city-tier3">
+        <div class="tag-item" data-val="hefei" onclick="toggleTag(this,'city')">🔬 合肥</div>
+        <div class="tag-item" data-val="other_city" onclick="toggleTag(this,'city')">📍 其他城市</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'city')" title="自定义城市">+</div>
+      </div>
+      <div class="city-group" id="city-abroad">
+        <div class="tag-item" data-val="us" onclick="toggleTag(this,'city')">🇺🇸 美国</div>
+        <div class="tag-item" data-val="europe" onclick="toggleTag(this,'city')">🇪🇺 欧洲</div>
+        <div class="tag-item" data-val="singapore" onclick="toggleTag(this,'city')">🇸🇬 新加坡</div>
+        <div class="tag-item" data-val="hk" onclick="toggleTag(this,'city')">🇭🇰 香港</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'city')" title="自定义城市">+</div>
+      </div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.2s;">
+      <div class="card-title"><span class="ti">📅</span>五年目标</div>
+      <div class="tag-grid" id="goalTags">
+        <div class="tag-item" data-val="firstjob" onclick="toggleTag(this,'goal',true)">🎯 找到理想工作</div>
+        <div class="tag-item" data-val="phd" onclick="toggleTag(this,'goal',true)">🎓 深造读博</div>
+        <div class="tag-item" data-val="abroad_study" onclick="toggleTag(this,'goal',true)">✈️ 出国留学</div>
+        <div class="tag-item" data-val="startup_goal" onclick="toggleTag(this,'goal',true)">💡 自主创业</div>
+        <div class="tag-item" data-val="public_goal" onclick="toggleTag(this,'goal',true)">🏛️ 考公考编</div>
+        <div class="tag-item" data-val="promote" onclick="toggleTag(this,'goal',true)">📈 晋升管理层</div>
+        <div class="tag-add-btn" onclick="showAddTagInput(this,'goal',true)" title="自定义目标">+</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="validateAndGoStep2()">下一步：做 MBTI 测评 →</button>
+  </div>
+
+  <!-- ===== 屏幕2：MBTI ===== -->
+  <div class="screen" id="screen-2">
+    <div class="section-title-bar">
+      <span class="section-emoji">🧠</span>
+      <span class="section-title">职业性格测评</span>
+      <span class="section-badge">STEP 2</span>
+    </div>
+    <div id="mbti-quiz-area"></div>
+    <div id="mbti-result-area" style="display:none;">
+      <div class="card">
+        <div class="mbti-result">
+          <div style="font-size:12px;color:#888;font-weight:700;margin-bottom:3px;">你的 MBTI 类型是</div>
+          <div class="mbti-type" id="mbtiTypeDisplay">INTJ</div>
+          <div id="mbtiTypeName" style="font-size:15px;font-weight:800;color:#333;margin-bottom:6px;"></div>
+          <span class="mbti-char" id="mbtiChar">🦉</span>
+          <div class="mbti-desc" id="mbtiDescription"></div>
+          <div style="font-weight:800;color:#333;margin:10px 0 7px;font-size:13px;">🌟 适合从事的职业</div>
+          <div class="career-badges" id="careerBadges"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goToStep(3)">下一步：填写简历 →</button>
+      <button class="btn-secondary" onclick="restartMBTI()" style="width:100%;margin-top:8px;">🔄 重新测评</button>
+    </div>
+  </div>
+
+  <!-- ===== 屏幕3：简历 ===== -->
+  <div class="screen" id="screen-3">
+    <div class="section-title-bar">
+      <span class="section-emoji">📋</span>
+      <span class="section-title">简历信息收集</span>
+      <span class="section-badge">STEP 3</span>
+    </div>
+    <div class="card fade-in">
+      <div class="card-title"><span class="ti">👤</span>基本信息</div>
+      <div class="form-group">
+        <div class="form-label">🎂 年龄</div>
+        <input type="number" class="form-input" id="userAge" placeholder="请输入年龄" min="16" max="35">
+      </div>
+      <div class="form-group">
+        <div class="form-label">📚 所学专业</div>
+        <input type="text" class="form-input" id="userMajor" placeholder="如：计算机科学与技术、金融学...">
+      </div>
+      <div class="form-group">
+        <div class="form-label">🎓 最高学历</div>
+        <select class="form-select" id="userDegree">
+          <option value="">请选择学历</option>
+          <option value="bachelor">本科</option>
+          <option value="master">硕士研究生</option>
+          <option value="phd">博士研究生</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">📅 目前年级</div>
+        <select class="form-select" id="userGrade">
+          <option value="">请选择年级</option>
+          <option value="freshman">大一</option><option value="sophomore">大二</option>
+          <option value="junior">大三</option><option value="senior">大四</option>
+          <option value="master1">研一</option><option value="master2">研二</option><option value="master3">研三</option>
+          <option value="phd1">博一</option><option value="phd2">博二</option><option value="phd3">博三</option>
+          <option value="phd4">博四</option><option value="phd5">博五</option>
+          <option value="graduated">已毕业</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">🏫 就读学校</div>
+        <input type="text" class="form-input" id="userSchool" placeholder="请输入学校名称">
+      </div>
+      <div class="form-group">
+        <div class="form-label">⭐ 学校档次</div>
+        <select class="form-select" id="userSchoolLevel">
+          <option value="">请选择</option>
+          <option value="985">985高校</option>
+          <option value="211">211高校（非985）</option>
+          <option value="double_first">双一流高校</option>
+          <option value="regular">普通本科</option>
+          <option value="junior_college">专科/高职院校</option>
+          <option value="overseas_top">海外名校（QS前100）</option>
+          <option value="overseas">海外普通高校</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">🌟 预计毕业年份</div>
+        <select class="form-select" id="userGradYear">
+          <option value="">请选择</option>
+          <option value="2025">2025年</option><option value="2026">2026年</option>
+          <option value="2027">2027年</option><option value="2028">2028年</option>
+          <option value="2029">2029年</option><option value="2030">2030年</option>
+        </select>
+      </div>
+      <button class="add-btn" onclick="addEduEntry()" style="margin-top:8px;">＋ 添加学历</button>
+      <div id="eduExtraList"></div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.08s;">
+      <div class="card-title"><span class="ti">📊</span>学业 & 技能</div>
+      <div class="form-group">
+        <div class="form-label">📈 GPA（选填）</div>
+        <input type="number" class="form-input" id="userGPA" placeholder="如：3.8" step="0.1" min="0" max="4">
+      </div>
+      <div class="form-group">
+        <div class="form-label">🌍 英语水平</div>
+        <div class="tag-grid" id="engTags">
+          <div class="tag-item" data-val="cet4" onclick="toggleTag(this,'eng',true)">四级</div>
+          <div class="tag-item" data-val="cet6" onclick="toggleTag(this,'eng',true)">六级</div>
+          <div class="tag-item" data-val="ielts" onclick="toggleTag(this,'eng',true)">雅思</div>
+          <div class="tag-item" data-val="toefl" onclick="toggleTag(this,'eng',true)">托福</div>
+          <div class="tag-item" data-val="native" onclick="toggleTag(this,'eng',true)">母语水平</div>
+          <div class="tag-add-btn" onclick="showAddTagInput(this,'eng',true)" title="自定义英语水平">+</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">💡 技能标签</div>
+        <div class="tag-grid" id="skillTags">
+          <div class="tag-item" data-val="python" onclick="toggleTag(this,'skill')">🐍 Python</div>
+          <div class="tag-item" data-val="java" onclick="toggleTag(this,'skill')">☕ Java</div>
+          <div class="tag-item" data-val="cpp" onclick="toggleTag(this,'skill')">💻 C/C++</div>
+          <div class="tag-item" data-val="ml" onclick="toggleTag(this,'skill')">🤖 机器学习</div>
+          <div class="tag-item" data-val="finance_skill" onclick="toggleTag(this,'skill')">💰 金融建模</div>
+          <div class="tag-item" data-val="design" onclick="toggleTag(this,'skill')">🎨 UI设计</div>
+          <div class="tag-item" data-val="lab" onclick="toggleTag(this,'skill')">🔬 实验室技能</div>
+          <div class="tag-add-btn" onclick="showAddTagInput(this,'skill')" title="自定义技能">+</div>
+        </div>
+      </div>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.12s;">
+      <div class="card-title"><span class="ti">💼</span>实习经历</div>
+      <div class="experience-list" id="internshipList">
+        <div class="exp-item">
+          <div class="exp-header">
+            <input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="公司名称" type="text">
+            <button class="exp-remove" onclick="removeExp(this)">×</button>
+          </div>
+          <input class="form-input" style="margin-top:6px;" placeholder="岗位名称" type="text">
+          <div style="display:flex;gap:7px;margin-top:6px;">
+            <input class="form-input" style="flex:1;" placeholder="开始时间" type="month">
+            <input class="form-input" style="flex:1;" placeholder="结束时间" type="month">
+          </div>
+          <input class="form-input" style="margin-top:6px;" placeholder="主要工作内容" type="text">
+        </div>
+      </div>
+      <button class="add-btn" onclick="addInternship()">＋ 添加实习经历</button>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.16s;">
+      <div class="card-title"><span class="ti">🏆</span>竞赛经历</div>
+      <div class="experience-list" id="competitionList">
+        <div class="exp-item">
+          <div class="exp-header">
+            <input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="竞赛名称" type="text">
+            <button class="exp-remove" onclick="removeExp(this)">×</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:6px;">
+            <input class="form-input" style="flex:1;" placeholder="获奖等级" type="text">
+            <input class="form-input" style="flex:1;" placeholder="年份" type="text">
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addCompetition()">＋ 添加竞赛经历</button>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.2s;">
+      <div class="card-title"><span class="ti">📄</span>学术成果</div>
+      <div class="experience-list" id="publicationList">
+        <div class="exp-item">
+          <div class="exp-header">
+            <input class="form-input exp-title-input" style="margin:0;" placeholder="论文/专利名称" type="text">
+            <button class="exp-remove" onclick="removeExp(this)">×</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:6px;">
+            <select class="form-select" style="flex:1;">
+              <option value="">成果类型</option>
+              <option>期刊论文</option><option>会议论文</option><option>专利</option>
+            </select>
+            <input class="form-input" style="flex:1;" placeholder="年份" type="text">
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addPublication()">＋ 添加学术成果</button>
+      <div style="height:6px;"></div>
+      <textarea class="form-input" id="otherAchieve" rows="2" placeholder="其他荣誉/社团经历（选填）" style="resize:none;"></textarea>
+    </div>
+    <!-- AI 引擎状态（支持用户自行配置 API Key） -->
+    <div class="api-settings-card fade-in" style="animation-delay:0.24s;">
+      <div class="card-title"><span class="ti">🤖</span>AI 规划引擎 <span class="ai-powered-badge">POWERED BY AI</span></div>
+      <div id="aiStatusArea" style="text-align:center;padding:8px 0;">
+        <div style="color:#888;font-size:13px;">正在检测 AI 服务状态...</div>
+      </div>
+      <!-- 用户自定义 API Key 配置（服务端未配置时显示） -->
+      <div id="userKeyConfigArea" style="display:none;">
+        <div style="margin-top:8px;padding:10px;background:rgba(255,193,7,0.08);border-radius:10px;border:1px dashed #f59e0b;">
+          <div style="font-size:12px;color:#b45309;font-weight:600;margin-bottom:8px;">🔑 配置你的 AI API Key</div>
+          <div class="api-input-group">
+            <input class="form-input api-key-input" id="userApiKeyInput" type="password" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" />
+          </div>
+          <div class="api-input-group" style="margin-top:6px;">
+            <input class="form-input api-key-input" id="userBaseUrlInput" type="text" placeholder="Base URL（可选，默认 https://api.deepseek.com）" style="flex:1;" />
+          </div>
+          <div class="api-input-group" style="margin-top:6px;">
+            <input class="form-input api-key-input" id="userModelInput" type="text" placeholder="模型名称（可选，默认 deepseek-chat）" style="flex:1;" />
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;justify-content:center;">
+            <button class="api-test-btn" onclick="saveUserAiKey()">💾 保存配置</button>
+            <button class="api-test-btn" style="background:linear-gradient(135deg,#10b981,#059669);" onclick="testUserAiKey()">🧪 测试连接</button>
+          </div>
+          <div class="api-hint">💡 你的 Key 将加密存储在服务器中，仅你本人可用。支持 DeepSeek、OpenAI 等兼容接口。</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="generatePlan()">🗺️ 生成我的职业规划路径图！</button>
+  </div>
+
+  <!-- ===== 屏幕4：路径图 ===== -->
+  <div class="screen" id="screen-4">
+    <div class="section-title-bar">
+      <span class="section-emoji">🗺️</span>
+      <span class="section-title">我的闯关路线图</span>
+      <span class="section-badge">RESULT</span>
+    </div>
+    <!-- 总结 -->
+    <div class="summary-section fade-in" id="summaryCard">
+      <div style="font-size:36px;margin-bottom:6px;" id="summaryEmoji">🦉</div>
+      <div style="font-size:16px;font-weight:900;margin-bottom:4px;" id="summaryTitle">职业冒险者，出发！</div>
+      <div style="font-size:12px;opacity:0.9;" id="summaryDesc">根据你的信息，为你量身定制了专属职业规划路线</div>
+    </div>
+    <!-- 发展建议 -->
+    <div class="card fade-in" style="animation-delay:0.08s;">
+      <div class="card-title"><span class="ti">💡</span>专属发展建议 <span class="ai-powered-badge">AI 生成</span></div>
+      <div id="adviceList"></div>
+      <div id="aiLoadingArea" style="display:none;">
+        <div class="ai-loading-fun">
+          <!-- 追尾巴小猫咪 -->
+          <div class="cat-chase-wrap">
+            <div class="cat-chase">
+              <div class="cat-body">
+                <div class="cat-head">
+                  <div class="cat-ear left"></div>
+                  <div class="cat-ear right"></div>
+                  <div class="cat-face">
+                    <div class="cat-eye left"></div>
+                    <div class="cat-eye right"></div>
+                    <div class="cat-nose"></div>
+                    <div class="cat-mouth"></div>
+                  </div>
+                </div>
+                <div class="cat-tail-wrap">
+                  <div class="cat-tail"></div>
+                  <div class="cat-paw"></div>
+                </div>
+              </div>
+            </div>
+            <div class="cat-thought">~ 抓抓抓 ~</div>
+          </div>
+          <!-- 等待文字 -->
+          <div class="ai-loading-text">AI 正在分析你的信息，生成专属规划<span class="dots"></span></div>
+          <!-- 小恐龙游戏 -->
+          <div class="mini-game-wrap">
+            <div class="mini-game-title">🎮 等得太无聊？来玩一局！</div>
+            <canvas id="dinoGame" width="320" height="120"></canvas>
+            <div class="mini-game-hint">空格键 / 点击屏幕 → 跳跃 ⬆️</div>
+            <div class="mini-game-score" id="dinoScore">分数: 0</div>
+          </div>
+        </div>
+      </div>
+      <div id="aiErrorArea" style="display:none;"></div>
+    </div>
+    <!-- 横向职业闯关路径图 -->
+    <div class="card fade-in" style="animation-delay:0.12s;padding:14px 0 0;">
+      <div class="card-title" style="padding:0 14px 10px;border-bottom:2px solid rgba(0,0,0,0.06);">
+        <span class="ti">🎮</span>职业闯关路径图
+        <span style="font-size:11px;color:#aaa;font-weight:500;margin-left:4px;">← 左右滑动 →</span>
+      </div>
+      <!-- 横向路线图 -->
+      <div class="roadmap-scroll-wrap" id="roadmapScrollWrap">
+        <div class="roadmap-track-h" id="roadmapTrackH">
+          <div class="rm-ground"></div>
+          <div class="rm-runner" id="rmRunner">🦉</div>
+          <!-- 里程碑动态生成 -->
+        </div>
+      </div>
+      <div style="padding:10px 14px 14px;font-size:11px;color:#888;text-align:center;">
+        ✅ 点击路标节点可以打卡记录经历，完成后获得🪙金币奖励！
+      </div>
+    </div>
+    <!-- 重新规划（保留信息） -->
+    <div style="margin-top:6px;margin-bottom:40px;display:flex;gap:10px;">
+      <button class="btn-secondary" style="flex:1;" onclick="replanKeepData()">✏️ 修改信息重规划</button>
+      <button class="btn-secondary" style="flex:1;background:linear-gradient(135deg,#cc3300,#aa2200);" onclick="replanFresh()">🔄 全新重新规划</button>
+    </div>
+  </div>
+
+  </div><!-- end page-content -->
+</div><!-- end app-container -->
+
+<!-- ===== 路标打卡弹窗 ===== -->
+<div class="checkin-modal" id="checkinModal">
+  <div class="checkin-sheet" id="checkinSheet">
+    <div class="sheet-handle"></div>
+    <div class="checkin-header">
+      <div class="checkin-icon" id="ciIcon">🎯</div>
+      <div>
+        <div class="checkin-title" id="ciTitle">打卡：第一次实习</div>
+        <div class="checkin-subtitle" id="ciSubtitle">记录你的经历，点亮路标！</div>
+      </div>
+    </div>
+    <div id="ciBody">
+      <!-- 动态内容 -->
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn-secondary" style="flex:1;" onclick="closeCheckin()">取消</button>
+      <button class="btn-primary" style="flex:1;margin:0;" onclick="confirmCheckin()">✅ 确认打卡，领取🪙</button>
+    </div>
+  </div>
+</div>
+
+<!-- 吐司 -->
+<div class="toast" id="toastMsg"></div>
+
+<script>
+// ============================================================
+//  ===== 全局状态 =====
+// ============================================================
+// ============================================================
+//  ===== 后端 API 通信层 =====
+// ============================================================
+const API_BASE = window.location.origin;  // 同源，直接走 Flask
+
+// 封装 API 请求（自动附带 JWT Token）
+// 不需要 Token 的接口列表（登录、注册、发送验证码等）
+const NO_AUTH_URLS = ['/api/login', '/api/register', '/api/send-email-code', '/api/login-by-email', '/api/health'];
+async function api(url, options = {}) {
+  const token = localStorage.getItem('career_token');
+  // 安全地合并 headers，避免展开 undefined 报错
+  const headers = Object.assign(
+    { 'Content-Type': 'application/json' },
+    (options && options.headers) || {},
+    token ? { 'Authorization': 'Bearer ' + token } : {}
+  );
+  // 构建 fetch 参数：合并 options 的其他属性（method、body 等），用合并好的 headers 覆盖
+  const fetchOptions = Object.assign({}, options);
+  fetchOptions.headers = headers;
+  try {
+    const resp = await fetch(API_BASE + url, fetchOptions);
+    const data = await resp.json();
+    // Token 过期处理：仅对需要认证的接口做跳转
+    if (resp.status === 401 && !NO_AUTH_URLS.includes(url)) {
+      localStorage.removeItem('career_token');
+      localStorage.removeItem('career_user');
+      showAuthOverlay();
+      return data;
+    }
+    return data;
+  } catch (e) {
+    console.error('API request failed:', url, e);
+    return { ok: false, msg: '网络请求失败，请检查后端服务是否启动' };
+  }
+}
+
+// ============================================================
+//  ===== 登录/注册逻辑 =====
+// ============================================================
+let currentUser = null;
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  hideAuthMsg();
+  if (tab === 'login') {
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('formLogin').classList.add('active');
+  } else if (tab === 'register') {
+    document.getElementById('tabRegister').classList.add('active');
+    document.getElementById('formRegister').classList.add('active');
+  } else {
+    document.getElementById('tabEmail').classList.add('active');
+    document.getElementById('formEmail').classList.add('active');
+  }
+}
+
+function showAuthMsg(text, type) {
+  const el = document.getElementById('authMsg');
+  el.textContent = text;
+  el.className = 'auth-msg ' + type;
+}
+
+function hideAuthMsg() {
+  document.getElementById('authMsg').className = 'auth-msg';
+  document.getElementById('authMsg').textContent = '';
+}
+
+function showAuthOverlay() {
+  document.getElementById('authOverlay').classList.remove('hidden');
+  document.getElementById('userMenu').style.display = 'none';
+}
+
+function hideAuthOverlay() {
+  document.getElementById('authOverlay').classList.add('hidden');
+}
+
+async function handleLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!username || !password) { showAuthMsg('请输入用户名和密码', 'error'); return; }
+
+  const btn = document.querySelector('#formLogin .auth-btn-primary');
+  btn.disabled = true; btn.textContent = '登录中...';
+
+  const res = await api('/api/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password })
+  });
+
+  btn.disabled = false; btn.textContent = '🚀 登录';
+
+  if (res.ok) {
+    onLoginSuccess(res.token, res.user);
+  } else {
+    showAuthMsg(res.msg || '登录失败', 'error');
+  }
+}
+
+async function handleRegister() {
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  const email = document.getElementById('regEmail').value.trim();
+
+  if (!username || !password) { showAuthMsg('用户名和密码不能为空', 'error'); return; }
+  if (password !== password2) { showAuthMsg('两次输入的密码不一致', 'error'); return; }
+  if (password.length < 6) { showAuthMsg('密码长度至少6位', 'error'); return; }
+
+  const btn = document.querySelector('#formRegister .auth-btn-primary');
+  btn.disabled = true; btn.textContent = '注册中...';
+
+  const res = await api('/api/register', {
+    method: 'POST',
+    body: JSON.stringify({ username, password, email: email || undefined })
+  });
+
+  btn.disabled = false; btn.textContent = '📝 注册';
+
+  if (res.ok) {
+    showAuthMsg('注册成功！正在登录...', 'success');
+    setTimeout(() => onLoginSuccess(res.token, res.user), 500);
+  } else {
+    showAuthMsg(res.msg || '注册失败', 'error');
+  }
+}
+
+let codeCountdown = 0;
+async function handleSendCode() {
+  const email = document.getElementById('emailAddr').value.trim();
+  if (!email) { showAuthMsg('请输入邮箱地址', 'error'); return; }
+
+  if (codeCountdown > 0) return;
+
+  const res = await api('/api/send-email-code', {
+    method: 'POST',
+    body: JSON.stringify({ email, purpose: 'login' })
+  });
+
+  if (res.ok) {
+    showAuthMsg(res.msg || '验证码已发送', 'success');
+    // 如果开发模式，自动填入验证码
+    if (res.dev_code) {
+      document.getElementById('emailCode').value = res.dev_code;
+    }
+    // 倒计时
+    codeCountdown = 60;
+    const btn = document.getElementById('sendCodeBtn');
+    const timer = setInterval(() => {
+      codeCountdown--;
+      btn.textContent = codeCountdown + 's';
+      btn.disabled = true;
+      if (codeCountdown <= 0) { clearInterval(timer); btn.textContent = '发送验证码'; btn.disabled = false; }
+    }, 1000);
+  } else {
+    showAuthMsg(res.msg || '发送失败', 'error');
+  }
+}
+
+async function handleEmailLogin() {
+  const email = document.getElementById('emailAddr').value.trim();
+  const code = document.getElementById('emailCode').value.trim();
+  if (!email || !code) { showAuthMsg('请输入邮箱和验证码', 'error'); return; }
+
+  const btn = document.querySelector('#formEmail .auth-btn-primary');
+  btn.disabled = true; btn.textContent = '验证中...';
+
+  const res = await api('/api/login-by-email', {
+    method: 'POST',
+    body: JSON.stringify({ email, code })
+  });
+
+  btn.disabled = false; btn.textContent = '📧 登录 / 注册';
+
+  if (res.ok) {
+    onLoginSuccess(res.token, res.user);
+  } else {
+    showAuthMsg(res.msg || '验证失败', 'error');
+  }
+}
+
+function onLoginSuccess(token, user) {
+  localStorage.setItem('career_token', token);
+  localStorage.setItem('career_user', JSON.stringify(user));
+  currentUser = user;
+  hideAuthOverlay();
+  // 更新 UI
+  document.getElementById('userMenu').style.display = 'block';
+  document.getElementById('userAvatarBtn').textContent = user.avatar || '🧑';
+  document.getElementById('dropdownUserInfo').textContent = `👤 ${user.username}` + (user.email ? ` · ${user.email}` : '');
+  // 加载用户数据
+  loadUserPlan();
+  // 检查 AI 状态
+  checkAIStatus();
+  showToast(`👋 欢迎回来，${user.username}！`);
+}
+
+function handleLogout() {
+  localStorage.removeItem('career_token');
+  localStorage.removeItem('career_user');
+  currentUser = null;
+  document.getElementById('userMenu').style.display = 'none';
+  closeUserDropdown();
+  showAuthOverlay();
+  showToast('👋 已退出登录');
+}
+
+function toggleUserDropdown() {
+  document.getElementById('userDropdown').classList.toggle('show');
+}
+
+function closeUserDropdown() {
+  document.getElementById('userDropdown').classList.remove('show');
+}
+
+// 点击页面其他区域关闭下拉菜单
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('userMenu');
+  if (menu && !menu.contains(e.target)) closeUserDropdown();
+});
+
+// ============================================================
+//  ===== 用户数据加载/保存 =====
+// ============================================================
+
+async function loadUserPlan() {
+  const res = await api('/api/plan');
+  if (res.ok && res.plan) {
+    const plan = res.plan;
+    // 恢复表单数据
+    if (plan.form_data) {
+      state.form = plan.form_data;
+      restoreFormData();
+    }
+    // 恢复标签选择
+    if (plan.selected_tags) {
+      state.sel = plan.selected_tags;
+      restoreTagSelections();
+    }
+    // 恢复 MBTI
+    if (plan.mbti_result) {
+      state.mbti = plan.mbti_result;
+    }
+    // 如果有 AI 规划结果，恢复里程碑 + 打卡记录
+    if (plan.ai_plan) {
+      try {
+        const aiResult = JSON.parse(plan.ai_plan);
+        if (aiResult.milestones) {
+          state.milestones = aiResult.milestones.map(m => ({
+            id: m.id||('n'+Math.random().toString(36).substr(2,4)),
+            icon: m.icon||'📍', color: m.color||'#6366f1',
+            label: m.label||'里程碑', time: m.time||'待定',
+            desc: m.desc||'', checkinType: m.checkinType||'text',
+            checkinLabel: m.checkinLabel||'记录你的经历', done: !!m.done
+          }));
+          // 恢复打卡记录
+          if (aiResult.checkedNodes) {
+            state.checkedNodes = aiResult.checkedNodes;
+          }
+          renderHRoadmap();
+          // 自动跳转到路线图页面
+          goToStep(4);
+          showToast('📂 已恢复你的职业规划路线图！');
+          return;
+        }
+      } catch(e) { console.warn('恢复AI规划失败:', e); }
+    }
+    showToast('📂 已加载你的规划数据');
+  }
+}
+
+async function savePlanToServer(aiPlanJson) {
+  saveFormData();
+  // 如果传入了 aiPlanJson（初次生成），解析后附加 checkedNodes 再存；
+  // 若未传入但已有里程碑，则把当前 milestones + checkedNodes 打包存储
+  let planToSave = null;
+  if (aiPlanJson) {
+    try {
+      const obj = JSON.parse(aiPlanJson);
+      obj.checkedNodes = state.checkedNodes;
+      planToSave = JSON.stringify(obj);
+    } catch(e) { planToSave = aiPlanJson; }
+  } else if (state.milestones.length > 0) {
+    // 只更新 checkedNodes（里程碑本身已在 milestones 中）
+    // 从 /api/plan 获取最新存储，保留 milestones，只更新 checkedNodes
+    try {
+      const existing = await api('/api/plan');
+      if (existing.ok && existing.plan && existing.plan.ai_plan) {
+        const obj = JSON.parse(existing.plan.ai_plan);
+        obj.checkedNodes = state.checkedNodes;
+        // 同步里程碑的 done 状态
+        if (obj.milestones) {
+          obj.milestones = obj.milestones.map(m => ({
+            ...m,
+            done: !!state.checkedNodes[m.id]
+          }));
+        }
+        planToSave = JSON.stringify(obj);
+      }
+    } catch(e) { console.warn('合并规划数据失败:', e); }
+  }
+  const res = await api('/api/plan', {
+    method: 'POST',
+    body: JSON.stringify({
+      form_data: state.form,
+      selected_tags: state.sel,
+      mbti_result: state.mbti,
+      ai_plan: planToSave || null,
+      plan_title: '',
+      api_model: ''
+    })
+  });
+  if (res.ok) {
+    console.log('✅ 规划数据已保存到服务器');
+  } else {
+    console.warn('⚠️ 规划数据保存失败:', res.msg);
+  }
+}
+
+// ============================================================
+//  ===== AI 状态检查 + 用户自定义 Key 配置 =====
+// ============================================================
+
+async function checkAIStatus() {
+  const area = document.getElementById('aiStatusArea');
+  const configArea = document.getElementById('userKeyConfigArea');
+  if (!area) return;
+  const res = await api('/api/ai/test', { method: 'POST' });
+  if (res.ok) {
+    const sourceLabel = res.key_source === 'user' ? '（使用你的 Key）' : '（服务端已配置）';
+    area.innerHTML = `<div style="color:#16a34a;font-size:13px;">✅ AI 引擎就绪${res.model ? ' (' + res.model + ')' : ''}</div>
+      <div style="color:#888;font-size:11px;margin-top:4px;">${sourceLabel} · 你的专属职业规划将由 AI 智能生成 🚀</div>`;
+    // 服务端已配置时，隐藏用户配置区域
+    if (res.key_source === 'server' && configArea) {
+      configArea.style.display = 'none';
+    }
+  } else {
+    const needKey = res.need_user_key;
+    area.innerHTML = `<div style="color:#f59e0b;font-size:13px;">⚠️ ${res.msg || 'AI 服务暂不可用'}</div>
+      <div style="color:#888;font-size:11px;margin-top:4px;">请配置你的 API Key 来解锁 AI 功能</div>`;
+    // 需要用户配置 Key 时，显示配置区域
+    if (needKey && configArea) {
+      configArea.style.display = 'block';
+      // 加载已有的用户设置
+      loadUserAiSettings();
+    }
+  }
+}
+
+// 加载用户已有的 AI 设置
+async function loadUserAiSettings() {
+  try {
+    const res = await api('/api/ai-settings', { method: 'GET' });
+    if (res.ok && res.settings) {
+      const s = res.settings;
+      const keyInput = document.getElementById('userApiKeyInput');
+      const urlInput = document.getElementById('userBaseUrlInput');
+      const modelInput = document.getElementById('userModelInput');
+      if (s.has_key && keyInput) keyInput.placeholder = '已配置: ' + (s.masked_key || '****') + '（留空则保持不变）';
+      if (urlInput && s.ai_base_url) urlInput.value = s.ai_base_url;
+      if (modelInput && s.ai_model) modelInput.value = s.ai_model;
+    }
+  } catch(e) {
+    console.error('加载 AI 设置失败:', e);
+  }
+}
+
+// 保存用户 AI Key
+async function saveUserAiKey() {
+  const key = document.getElementById('userApiKeyInput')?.value?.trim() || '';
+  const baseUrl = document.getElementById('userBaseUrlInput')?.value?.trim() || '';
+  const model = document.getElementById('userModelInput')?.value?.trim() || '';
+
+  if (!key) {
+    showToast('⚠️ 请输入 API Key');
+    return;
+  }
+
+  const res = await api('/api/ai-settings', {
+    method: 'POST',
+    body: JSON.stringify({ ai_api_key: key, ai_base_url: baseUrl, ai_model: model })
+  });
+
+  if (res.ok) {
+    showToast('✅ AI 配置已保存');
+    // 清空 Key 输入框
+    document.getElementById('userApiKeyInput').value = '';
+    // 重新检测状态
+    checkAIStatus();
+  } else {
+    showToast('❌ 保存失败: ' + (res.msg || '未知错误'));
+  }
+}
+
+// 测试用户配置的 AI Key
+async function testUserAiKey() {
+  const key = document.getElementById('userApiKeyInput')?.value?.trim() || '';
+  const baseUrl = document.getElementById('userBaseUrlInput')?.value?.trim() || '';
+  const model = document.getElementById('userModelInput')?.value?.trim() || '';
+
+  // 如果有新输入的 Key，先保存
+  if (key) {
+    await saveUserAiKey();
+  } else {
+    // 没有新 Key，直接测试已有配置
+    checkAIStatus();
+  }
+}
+
+// ============================================================
+//  ===== 公司招聘链接功能 =====
+// ============================================================
+
+async function showCompanyLinks(companyName) {
+  const res = await api('/api/company-links', {
+    method: 'POST',
+    body: JSON.stringify({ company: companyName })
+  });
+
+  if (res.ok && res.links && res.links.length) {
+    document.getElementById('clpTitle').innerHTML = `🏢 ${companyName} — 招聘信息`;
+    document.getElementById('clpLinks').innerHTML = res.links.map(link =>
+      `<a class="clp-link" href="${link.url}" target="_blank" rel="noopener noreferrer">
+        <div class="clp-icon">${link.icon}</div>
+        <div class="clp-info">
+          <div class="clp-name">${link.name}</div>
+          <div class="clp-desc">${link.desc}</div>
+        </div>
+        <span class="clp-arrow">→</span>
+      </a>`
+    ).join('');
+    document.getElementById('companyLinkPanel').classList.add('show');
+    document.getElementById('clpMask').classList.add('show');
+  } else {
+    showToast('⚠️ 暂无该公司的招聘链接');
+  }
+}
+
+function closeCompanyLinks() {
+  document.getElementById('companyLinkPanel').classList.remove('show');
+  document.getElementById('clpMask').classList.remove('show');
+}
+
+// ============================================================
+//  ===== 页面初始化 =====
+// ============================================================
+
+async function initApp() {
+  // 检查是否已登录
+  const token = localStorage.getItem('career_token');
+  const userStr = localStorage.getItem('career_user');
+
+  if (token && userStr) {
+    try {
+      // 验证 token 是否有效
+      const res = await api('/api/profile');
+      if (res.ok) {
+        currentUser = res.user;
+        document.getElementById('userMenu').style.display = 'block';
+        document.getElementById('userAvatarBtn').textContent = currentUser.avatar || '🧑';
+        document.getElementById('dropdownUserInfo').textContent = `👤 ${currentUser.username}` + (currentUser.email ? ` · ${currentUser.email}` : '');
+        hideAuthOverlay();
+        // 加载用户数据
+        loadUserPlan();
+        // 检查 AI 状态
+        checkAIStatus();
+      } else {
+        // Token 无效，显示登录
+        showAuthOverlay();
+      }
+    } catch(e) {
+      showAuthOverlay();
+    }
+  } else {
+    showAuthOverlay();
+  }
+}
+
+const state = {
+  step: 0,
+  avatar: '🧑‍🎓',
+  coins: 0,
+  achievements: [],   // {time, title, icon}
+  powerup: false,     // 蘑菇加倍
+  soundOn: true,
+  milestones: [],     // 路标数据
+  checkedNodes: {},   // {nodeId: {note, extra, time}}
+  sel: { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[] },
+  mbti: { answers:{}, result:null, q:0 },
+  form: {},           // 简历保留数据
+};
+
+// ============================================================
+//  ===== Web Audio BGM (马里奥风格合成) =====
+// ============================================================
+let audioCtx = null;
+let bgmNodes = [];
+let bgmLoop = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+// 马里奥主题旋律近似音符 (频率Hz, 时值s)
+const marioMelody = [
+  [659,0.15],[659,0.15],[0,0.08],[659,0.15],[0,0.08],[523,0.15],[659,0.18],
+  [784,0.18],[0,0.18],[392,0.18],[0,0.18],
+  [523,0.15],[0,0.1],[392,0.15],[0,0.1],[330,0.15],[0,0.1],
+  [440,0.18],[494,0.18],[466,0.15],[440,0.18],
+  [392,0.15],[659,0.15],[784,0.15],[880,0.18],[698,0.15],[784,0.15],
+  [659,0.18],[523,0.15],[587,0.15],[494,0.18],[0,0.2],
+];
+
+let bgmPlaying = false;
+let bgmTimeoutId = null;
+
+function playBGM() {
+  if (!state.soundOn || bgmPlaying) return;
+  ensureAudio();
+  bgmPlaying = true;
+  let t = audioCtx.currentTime + 0.05;
+  function scheduleLoop() {
+    marioMelody.forEach(([freq, dur]) => {
+      if (freq > 0) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur * 0.9);
+        osc.start(t); osc.stop(t + dur);
+      }
+      t += dur;
+    });
+    // 循环
+    const loopDur = marioMelody.reduce((s,[,d])=>s+d,0);
+    bgmTimeoutId = setTimeout(() => { if(state.soundOn) scheduleLoop(); else bgmPlaying=false; }, loopDur * 1000 - 100);
+  }
+  scheduleLoop();
+}
+
+function stopBGM() {
+  bgmPlaying = false;
+  clearTimeout(bgmTimeoutId);
+}
+
+function toggleSound() {
+  state.soundOn = !state.soundOn;
+  const btn = document.getElementById('soundBtn');
+  btn.textContent = state.soundOn ? '🔊' : '🔇';
+  btn.classList.toggle('muted', !state.soundOn);
+  if (state.soundOn) playBGM();
+  else stopBGM();
+  showToast(state.soundOn ? '🔊 音效已开启' : '🔇 音效已关闭');
+}
+
+// 音效：收集金币
+function playCoinSfx() {
+  if (!state.soundOn) return;
+  ensureAudio();
+  [[988,0.08],[1319,0.12],[1568,0.1]].forEach(([f,d],i)=>{
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='square';o.frequency.value=f;
+    const t=audioCtx.currentTime+i*0.07;
+    g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.start(t);o.stop(t+d+0.01);
+  });
+}
+
+// 音效：跳跃
+function playJumpSfx() {
+  if (!state.soundOn) return;
+  ensureAudio();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  o.type='square';
+  const t=audioCtx.currentTime;
+  o.frequency.setValueAtTime(400,t);
+  o.frequency.exponentialRampToValueAtTime(900,t+0.12);
+  g.gain.setValueAtTime(0.08,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+  o.start(t);o.stop(t+0.15);
+}
+
+// 音效：通关
+function playLevelupSfx() {
+  if (!state.soundOn) return;
+  ensureAudio();
+  const notes=[[523,0.1],[659,0.1],[784,0.1],[1047,0.25]];
+  let t=audioCtx.currentTime;
+  notes.forEach(([f,d])=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='triangle';o.frequency.value=f;
+    g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.start(t);o.stop(t+d);t+=d;
+  });
+}
+
+// 音效：蘑菇
+function playMushroomSfx() {
+  if (!state.soundOn) return;
+  ensureAudio();
+  [[330,0.08],[440,0.08],[550,0.08],[660,0.12]].forEach(([f,d],i)=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='sawtooth';o.frequency.value=f;
+    const t=audioCtx.currentTime+i*0.06;
+    g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.start(t);o.stop(t+d);
+  });
+}
+
+// ============================================================
+//  ===== 玩家控制 =====
+// ============================================================
+let isJumping = false;
+let playerX = 40;
+let autoMoveTimer = null;
+
+function playerJump() {
+  if (isJumping) return;
+  isJumping = true;
+  playJumpSfx();
+  const p = document.getElementById('player');
+  p.classList.add('jumping');
+  p.classList.remove('running');
+  setTimeout(() => {
+    p.classList.remove('jumping');
+    isJumping = false;
+  }, 560);
+}
+
+function movePlayer(x) {
+  playerX = Math.max(20, Math.min(window.innerWidth - 60, x));
+  document.getElementById('player').style.left = playerX + 'px';
+}
+
+// 点击屏幕任意位置让角色跑过去
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.app-container') || e.target.closest('.checkin-modal')) return;
+  const p = document.getElementById('player');
+  const targetX = e.clientX - 22;
+  p.classList.add('running');
+  const dir = targetX > playerX ? 1 : -1;
+  p.style.transform = dir < 0 ? 'scaleX(-1)' : '';
+  movePlayer(targetX);
+  setTimeout(() => p.classList.remove('running'), 400);
+});
+
+// 键盘控制
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); playerJump(); }
+  if (e.code === 'ArrowLeft') movePlayer(playerX - 30);
+  if (e.code === 'ArrowRight') movePlayer(playerX + 30);
+});
+
+// ============================================================
+//  ===== 问号砖块 =====
+// ============================================================
+function hitQBlock(el, id) {
+  if (el.classList.contains('hit')) return;
+  el.classList.add('hit');
+  el.textContent = '📦';
+  // 弹出金币
+  const rect = el.getBoundingClientRect();
+  spawnPopCoin(rect.left + 10, rect.top - 10);
+  addCoins(3, el);
+  playCoinSfx();
+  // 随机5%几率出蘑菇
+  if (Math.random() < 0.3) {
+    setTimeout(() => spawnExtraMushroom(rect.left, rect.top), 500);
+  }
+}
+
+function spawnPopCoin(x, y) {
+  const el = document.createElement('div');
+  el.className = 'pop-coin';
+  el.style.cssText = `position:fixed;left:${x}px;top:${y}px;font-size:24px;pointer-events:none;z-index:200;`;
+  el.textContent = '🪙';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
+function spawnExtraMushroom(x, y) {
+  const el = document.createElement('div');
+  el.className = 'bg-mushroom';
+  el.style.cssText = `position:fixed;left:${x}px;top:${y}px;font-size:28px;z-index:15;cursor:pointer;animation:coin-float 2s ease-in-out infinite;`;
+  el.textContent = '🍄';
+  el.onclick = () => collectMushroom(el);
+  document.body.appendChild(el);
+  setTimeout(() => { if(document.body.contains(el)) el.remove(); }, 8000);
+}
+
+// ============================================================
+//  ===== 收集道具 =====
+// ============================================================
+function collectBgCoin(el) {
+  playCoinSfx();
+  const rect = el.getBoundingClientRect();
+  addCoins(state.powerup ? 2 : 1, el);
+  flyToNav(rect.left, rect.top);
+  // 销毁后重生
+  el.style.visibility = 'hidden';
+  setTimeout(() => {
+    el.style.visibility = '';
+    el.style.animation = 'coin-float ease-in-out infinite';
+    el.style.animationDelay = Math.random()*2 + 's';
+    el.style.animationDuration = (2.5+Math.random()) + 's';
+  }, 4000);
+}
+
+function collectMushroom(el) {
+  playMushroomSfx();
+  el.style.animation = 'mushroom-collect 0.4s ease forwards';
+  // 激活加倍
+  state.powerup = true;
+  const banner = document.getElementById('powerupBanner');
+  banner.classList.add('show');
+  setTimeout(() => { banner.classList.remove('show'); }, 2200);
+  setTimeout(() => { state.powerup = false; el.remove(); }, 400);
+  addCoins(5, el);
+  showToast('🍄 超级蘑菇！接下来金币×2！', 2500);
+}
+
+function flyToNav(fromX, fromY) {
+  const el = document.createElement('div');
+  el.className = 'fly-coin';
+  const navCoin = document.querySelector('.coin-counter');
+  const rect2 = navCoin.getBoundingClientRect();
+  const tx = rect2.left - fromX + 16;
+  const ty = rect2.top - fromY + 10;
+  el.style.cssText = `left:${fromX}px;top:${fromY}px;--tx:${tx}px;--ty:${ty}px;`;
+  el.textContent = '🪙';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 850);
+}
+
+// ============================================================
+//  ===== 金币系统 =====
+// ============================================================
+function addCoins(n, srcEl) {
+  const add = state.powerup ? n * 2 : n;
+  state.coins += add;
+  document.getElementById('coinScore').textContent = state.coins;
+  updateCoinGrid();
+  // 弹出文字
+  const popup = document.createElement('div');
+  popup.style.cssText = `position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-size:22px;
+    font-weight:900;color:#ffd700;text-shadow:2px 2px 0 rgba(0,0,0,0.4);pointer-events:none;z-index:998;
+    animation:coinPop 0.75s ease forwards;`;
+  popup.textContent = `+${add}🪙`;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 780);
+}
+
+// 添加全局金币弹出动画
+(function(){
+  const s=document.createElement('style');
+  s.textContent='@keyframes coinPop{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5);}50%{opacity:1;transform:translate(-50%,-80%) scale(1.3);}100%{opacity:0;transform:translate(-50%,-120%) scale(1);}}';
+  document.head.appendChild(s);
+})();
+
+function updateCoinGrid() {
+  const grid = document.getElementById('coinGrid');
+  const total = Math.min(state.coins, 20);
+  grid.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'coin-slot' + (i < total ? ' earned' : '');
+    slot.textContent = i < total ? '🪙' : '○';
+    grid.appendChild(slot);
+  }
+}
+
+function addAchievement(icon, title) {
+  state.achievements.unshift({ icon, title, time: new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}) });
+  refreshAchLog();
+}
+
+function refreshAchLog() {
+  const log = document.getElementById('achLog');
+  if (!state.achievements.length) {
+    log.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;text-align:center;padding:8px;">完成路标打卡可获得金币 ✨</div>';
+    return;
+  }
+  log.innerHTML = state.achievements.slice(0,8).map(a=>
+    `<div class="ach-item"><span class="ai">${a.icon}</span><span>${a.title}</span><span style="margin-left:auto;opacity:0.5;font-size:10px;">${a.time}</span></div>`
+  ).join('');
+}
+
+// ============================================================
+//  ===== 主题切换 =====
+// ============================================================
+function setTheme(cls, dot) {
+  document.body.className = cls;
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  dot.classList.add('active');
+  showToast('✨ 主题已切换！');
+  playCoinSfx();
+}
+
+// ============================================================
+//  ===== 步骤导航 =====
+// ============================================================
+const stepProgress = [5,25,52,76,100];
+
+function goToStep(n) {
+  try {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const screenEl = document.getElementById('screen-' + n);
+    if (!screenEl) throw new Error('screen-' + n + ' not found!');
+    screenEl.classList.add('active');
+    document.getElementById('progressFill').style.width = stepProgress[n] + '%';
+    document.getElementById('progressText').textContent = `第 ${n+1}/5 步`;
+    document.querySelectorAll('.step-dot').forEach((d,i)=>{
+      d.classList.remove('active','completed');
+      if(i<n) d.classList.add('completed');
+      if(i===n) d.classList.add('active');
+    });
+    state.step = n;
+    if (n===2 && !Object.keys(state.mbti.answers).length) initMBTI();
+    window.scrollTo({top:0,behavior:'smooth'});
+    // 更新玩家角色
+    document.getElementById('player').textContent = state.avatar;
+    document.getElementById('rmRunner').textContent = state.avatar;
+    // 返回按钮：首页隐藏，其他页面显示
+    const backBtn = document.getElementById('navBackBtn');
+    if (n > 0) { backBtn.classList.add('visible'); } else { backBtn.classList.remove('visible'); }
+  } catch(e) {
+    console.error('goToStep error:', e);
+  }
+}
+
+// 返回上一步
+function goPrevStep() {
+  if (state.step > 0) goToStep(state.step - 1);
+}
+
+// 复制API链接到剪贴板
+// copyApiLink 已移除（AI Key 由服务端统一管理）
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy');
+    document.getElementById('apiLinkCopied').style.display = 'inline';
+    showToast('📋 链接已复制！');
+    setTimeout(()=>{ document.getElementById('apiLinkCopied').style.display = 'none'; }, 5000);
+  } catch(e) { showToast('复制失败，请手动复制：' + text); }
+  document.body.removeChild(ta);
+}
+
+// ============================================================
+//  ===== 角色选择 =====
+// ============================================================
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-opt').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  state.avatar = el.dataset.char;
+  document.getElementById('heroCharDisplay').textContent = state.avatar;
+  document.getElementById('player').textContent = state.avatar;
+  addCoins(1, el);
+  playCoinSfx();
+}
+
+// ============================================================
+//  ===== 标签选择 =====
+// ============================================================
+function toggleTag(el, group, single=false) {
+  const val = el.dataset.val;
+  if (single) {
+    const siblings = el.closest('.tag-grid, .card').querySelectorAll('.tag-item');
+    siblings.forEach(t=>t.classList.remove('selected'));
+    state.sel[group] = [val];
+    el.classList.add('selected');
+  } else {
+    const idx = state.sel[group].indexOf(val);
+    if (idx===-1) { state.sel[group].push(val); el.classList.add('selected'); addCoins(1, el); playCoinSfx(); }
+    else { state.sel[group].splice(idx,1); el.classList.remove('selected'); }
+  }
+}
+
+// ===== 自定义标签（+按钮） =====
+// 存储自定义标签 { group: [{ val, label }] }
+const customTags = { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[] };
+
+function showAddTagInput(btn, group, single=false) {
+  // 如果已经存在输入框就跳过
+  if (btn.parentElement.querySelector('.tag-add-input')) return;
+  const input = document.createElement('input');
+  input.className = 'tag-add-input';
+  input.type = 'text';
+  input.placeholder = '输入自定义选项…';
+  input.setAttribute('data-group', group);
+  input.setAttribute('data-single', single ? '1' : '0');
+  btn.insertAdjacentElement('beforebegin', input);
+  input.focus();
+  // 确认
+  const confirm = () => {
+    const text = input.value.trim();
+    if (!text) { input.remove(); return; }
+    addCustomTag(text, group, single, btn);
+    input.remove();
+  };
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+    if (e.key === 'Escape') { input.remove(); }
+  });
+  input.addEventListener('blur', () => { setTimeout(confirm, 100); });
+}
+
+function addCustomTag(text, group, single, refBtn) {
+  // 检查重复
+  const existingVals = customTags[group].map(t=>t.val);
+  if (existingVals.includes(text)) { showToast('⚠️ 该选项已存在'); return; }
+  const val = 'custom_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+  const tag = { val, label: text };
+  customTags[group].push(tag);
+  // 创建DOM元素
+  const el = document.createElement('div');
+  el.className = 'tag-item custom-tag fade-in';
+  el.dataset.val = val;
+  el.onclick = function() { toggleTag(this, group, single); };
+  el.innerHTML = `${text}<span class="tag-remove" onclick="event.stopPropagation();removeCustomTag(this,'${group}')" title="删除">×</span>`;
+  refBtn.insertAdjacentElement('beforebegin', el);
+  // 同时在 labelMap 中注册（供 AI prompt 使用）
+  if (!labelMap[group]) labelMap[group] = {};
+  labelMap[group][val] = text;
+  // 自动选中
+  toggleTag(el, group, single);
+  playCoinSfx();
+  showToast('✅ 已添加自定义选项：' + text);
+}
+
+function removeCustomTag(removeBtn, group) {
+  const tagEl = removeBtn.closest('.tag-item');
+  const val = tagEl.dataset.val;
+  // 从状态中移除
+  const idx = state.sel[group].indexOf(val);
+  if (idx !== -1) state.sel[group].splice(idx, 1);
+  // 从自定义标签列表中移除
+  const cIdx = customTags[group].findIndex(t=>t.val===val);
+  if (cIdx !== -1) customTags[group].splice(cIdx, 1);
+  // 动画移除
+  tagEl.style.cssText = 'transform:scale(0);opacity:0;transition:all 0.25s;';
+  setTimeout(() => tagEl.remove(), 260);
+  showToast('🗑️ 已移除自定义选项');
+}
+
+function switchCityGroup(btn, group) {
+  document.querySelectorAll('.city-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.city-group').forEach(g=>g.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('city-'+group).classList.add('active');
+}
+
+// ============================================================
+//  ===== Step1 验证 =====
+// ============================================================
+function validateAndGoStep2() {
+  if (!state.sel.industry.length) {
+    showToast('⚠️ 请至少选择一个行业方向！');
+    document.getElementById('industryTags').classList.add('shake');
+    setTimeout(()=>document.getElementById('industryTags').classList.remove('shake'),500);
+    return;
+  }
+  if (!state.sel.city.length) { showToast('🗺️ 别忘了选择期望就业城市！'); return; }
+  addCoins(10, document.getElementById('industryTags'));
+  playLevelupSfx();
+  showToast('🎉 目标已设定！获得金币+10');
+  goToStep(2);
+}
+
+// ============================================================
+//  ===== MBTI =====
+// ============================================================
+const mbtiQs = [
+  {text:"在派对上，你更倾向于...",optA:"😄 主动认识新朋友",optB:"🤫 和老朋友聊",dim:"EI",aDir:"E"},
+  {text:"面对新项目，你首先会...",optA:"📊 分析现有数据",optB:"💭 构思创新方案",dim:"SN",aDir:"S"},
+  {text:"做决策时，更看重...",optA:"⚖️ 逻辑和客观事实",optB:"❤️ 别人感受和和谐",dim:"TF",aDir:"T"},
+  {text:"你更喜欢的生活方式...",optA:"📅 有计划有安排",optB:"🎲 随机应变灵活",dim:"JP",aDir:"J"},
+  {text:"独处时，你通常会...",optA:"⚡ 想着出去社交",optB:"🔋 享受独处充电",dim:"EI",aDir:"E"},
+  {text:"你更信任什么信息？",optA:"🔍 亲眼所见可查事实",optB:"✨ 直觉感知整体印象",dim:"SN",aDir:"S"},
+  {text:"批评他人时，你更可能...",optA:"🎯 直接指出问题",optB:"🌸 委婉先肯定再建议",dim:"TF",aDir:"T"},
+  {text:"出行旅游，你更喜欢...",optA:"🗺️ 提前规划好",optB:"🧳 随性说走就走",dim:"JP",aDir:"J"},
+  {text:"团队中，你倾向...",optA:"🙋 积极主导讨论",optB:"🎧 深思熟虑后发言",dim:"EI",aDir:"E"},
+  {text:"解决复杂问题，你喜欢...",optA:"🔧 运用已有经验",optB:"🌀 探索新方法打破常规",dim:"SN",aDir:"S"},
+  {text:"朋友倾诉烦恼，你倾向...",optA:"🧩 分析提方案",optB:"🫂 先给予情感支持",dim:"TF",aDir:"T"},
+  {text:"面对截止日期，你通常...",optA:"⏰ 提前完成不喜欢压力",optB:"🔥 最后冲刺效率更高",dim:"JP",aDir:"J"},
+];
+
+const mbtiData = {
+  "INTJ":{name:"建筑师",char:"🦉",color:"#6633cc",desc:"独立、有远见、战略性思维极强。追求效率和完美，能洞察他人看不到的可能性。",careers:["战略分析师","产品经理","科学家","工程师","投资顾问","程序员"]},
+  "INTP":{name:"逻辑学家",char:"🔭",color:"#3366ff",desc:"逻辑严密、好奇心旺盛。热爱探索复杂理论，总能找到问题的本质。",careers:["研究员","数据科学家","软件开发","学者","系统分析师","哲学家"]},
+  "ENTJ":{name:"指挥官",char:"🦁",color:"#cc2200",desc:"天生领导者，自信、果断、目标导向。善于制定长期计划，推动变革。",careers:["CEO","项目总监","律师","金融分析师","创业者","咨询顾问"]},
+  "ENTP":{name:"辩论家",char:"🦊",color:"#ff6600",desc:"机智、创新、充满活力。喜欢挑战现状，天生的创意家。",careers:["创业者","律师","顾问","市场总监","产品创新","编剧"]},
+  "INFJ":{name:"提倡者",char:"🦋",color:"#9933cc",desc:"富有洞察力、理想主义。深刻理解他人，致力于让世界变得更好。",careers:["心理咨询师","作家","教育者","社工","HR","公益人士"]},
+  "INFP":{name:"调停者",char:"🌸",color:"#ff66aa",desc:"理想主义、有创造力，忠于自己的价值观。富有艺术感。",careers:["作家","设计师","心理咨询师","教育者","艺术家","UX设计"]},
+  "ENFJ":{name:"主人公",char:"🌟",color:"#ff9900",desc:"有感召力、善于激励他人。能理解并引导他人，是优秀的沟通者。",careers:["教师","培训师","HR总监","政治家","公关","团队领导"]},
+  "ENFP":{name:"活动家",char:"🌈",color:"#ff6699",desc:"热情、有创造力、善于联结。对未来充满期待，点子层出不穷。",careers:["市场营销","创意总监","演讲者","记者","公关","创业者"]},
+  "ISTJ":{name:"物流师",char:"🏛️",color:"#446699",desc:"可靠、有条理、踏实负责。注重细节，履行承诺，最可信赖的人。",careers:["会计","审计师","项目经理","公务员","律师","银行家"]},
+  "ISFJ":{name:"守护者",char:"🛡️",color:"#336699",desc:"温暖、细心、有责任感。默默付出，关注他人需求。",careers:["护士","教师","行政管理","HR","社工","客服经理"]},
+  "ESTJ":{name:"总经理",char:"👔",color:"#cc4400",desc:"务实、果断、注重秩序。善于管理流程和团队。",careers:["管理者","项目经理","法官","政府官员","金融顾问","军官"]},
+  "ESFJ":{name:"执政官",char:"🤗",color:"#ff4488",desc:"热情、有爱心、关注他人。总是把他人的需求放在首位。",careers:["教师","护士","人力资源","销售","活动策划","客户经理"]},
+  "ISTP":{name:"鉴赏家",char:"🔧",color:"#448844",desc:"灵活、擅长实践、独立。天生的工匠，善于找到实用解决方案。",careers:["工程师","飞行员","程序员","外科医生","机械师","侦探"]},
+  "ISFP":{name:"探险家",char:"🎨",color:"#cc8800",desc:"温柔、有艺术感。有独特审美，喜欢用创造力表达自己。",careers:["设计师","摄影师","厨师","艺术家","兽医","时尚设计"]},
+  "ESTP":{name:"企业家",char:"🏄",color:"#cc3300",desc:"大胆、聪明、感知力强。充满活力，善于把握当下机遇。",careers:["销售总监","创业者","演员","谈判专家","经纪人","消防员"]},
+  "ESFP":{name:"表演者",char:"🎭",color:"#ff3399",desc:"自发、热情、活力四射。让生活充满乐趣，天生的表演者。",careers:["演员","活动策划","销售","幼儿教育","DJ","主播"]},
+};
+
+let mbtiScores = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+
+function initMBTI() {
+  state.mbti.q = 0;
+  mbtiScores = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  renderMBTIQ(0);
+  document.getElementById('mbti-result-area').style.display='none';
+  document.getElementById('mbti-quiz-area').style.display='block';
+}
+
+function restartMBTI() { state.mbti.answers={}; initMBTI(); }
+
+function renderMBTIQ(idx) {
+  if(idx>=mbtiQs.length){finishMBTI();return;}
+  const q=mbtiQs[idx];
+  document.getElementById('mbti-quiz-area').innerHTML=`
+    <div class="question-card">
+      <div class="q-num">❓ 第${idx+1}/${mbtiQs.length}题
+        <div style="margin-left:auto;background:#f0f0f0;border-radius:6px;height:6px;width:110px;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));width:${((idx+1)/mbtiQs.length)*100}%;border-radius:6px;transition:width 0.4s;"></div>
+        </div>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="answer-options">
+        <button class="answer-btn" onclick="answerMBTI('A','${q.dim}',${idx},this)">${q.optA}</button>
+        <button class="answer-btn" onclick="answerMBTI('B','${q.dim}',${idx},this)">${q.optB}</button>
+      </div>
+    </div>
+    <div style="text-align:center;color:rgba(255,255,255,0.65);font-size:11px;margin-top:6px;">请选择最符合你真实状态的选项 🎯</div>`;
+}
+
+function answerMBTI(choice, dim, idx, btn) {
+  btn.classList.add(choice==='A'?'sel-a':'sel-b');
+  btn.parentElement.querySelectorAll('.answer-btn').forEach(b=>b.onclick=null);
+  const dims=dim.split('');
+  mbtiScores[choice==='A'?dims[0]:dims[1]]++;
+  state.mbti.answers[idx]=choice;
+  addCoins(2, btn);
+  playCoinSfx();
+  setTimeout(()=>renderMBTIQ(idx+1),480);
+}
+
+function finishMBTI() {
+  const type=[mbtiScores.E>=mbtiScores.I?'E':'I',mbtiScores.S>=mbtiScores.N?'S':'N',
+    mbtiScores.T>=mbtiScores.F?'T':'F',mbtiScores.J>=mbtiScores.P?'J':'P'].join('');
+  state.mbti.result=type;
+  const d=mbtiData[type]||mbtiData['ENFP'];
+  document.getElementById('mbti-quiz-area').style.display='none';
+  document.getElementById('mbti-result-area').style.display='block';
+  document.getElementById('mbtiTypeDisplay').textContent=type;
+  document.getElementById('mbtiTypeDisplay').style.color=d.color;
+  document.getElementById('mbtiTypeName').textContent=`「${d.name}」`;
+  document.getElementById('mbtiChar').textContent=d.char;
+  document.getElementById('mbtiDescription').innerHTML=`<div style="font-weight:800;color:#333;margin-bottom:5px;">${d.char} ${d.name}</div><div style="font-size:12px;color:#555;line-height:1.6;">${d.desc}</div>`;
+  const colors=['#ff6633','#3366ff','#00aa44','#9933cc','#ff9900','#cc2200'];
+  document.getElementById('careerBadges').innerHTML=d.careers.map((c,i)=>`
+    <div class="career-badge fade-in" style="background:${colors[i%6]}20;color:${colors[i%6]};border:2px solid ${colors[i%6]}44;animation-delay:${i*0.08}s;">${c}</div>`).join('');
+  addCoins(20, document.getElementById('mbtiTypeDisplay'));
+  playLevelupSfx();
+  addAchievement('🧠', `MBTI测评完成：${type} ${d.name}`);
+  showToast(`🎉 你是 ${type} ${d.name}！获得金币+20`);
+}
+
+// ============================================================
+//  ===== 经历增删 =====
+// ============================================================
+function addInternship(){
+  const l=document.getElementById('internshipList'),d=document.createElement('div');
+  d.className='exp-item fade-in';
+  d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="公司名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+    <input class="form-input" style="margin-top:6px;" placeholder="岗位名称" type="text">
+    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="开始时间" type="month"><input class="form-input" style="flex:1;" placeholder="结束时间" type="month"></div>
+    <input class="form-input" style="margin-top:6px;" placeholder="主要工作内容" type="text">`;
+  l.appendChild(d);
+}
+function addCompetition(){
+  const l=document.getElementById('competitionList'),d=document.createElement('div');
+  d.className='exp-item fade-in';
+  d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="竞赛名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="获奖等级" type="text"><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>`;
+  l.appendChild(d);
+}
+function addPublication(){
+  const l=document.getElementById('publicationList'),d=document.createElement('div');
+  d.className='exp-item fade-in';
+  d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;" placeholder="论文/专利名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+    <div style="display:flex;gap:7px;margin-top:6px;"><select class="form-select" style="flex:1;"><option value="">成果类型</option><option>期刊论文</option><option>会议论文</option><option>专利</option></select><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>`;
+  l.appendChild(d);
+}
+function removeExp(btn){
+  const i=btn.closest('.exp-item');
+  i.style.cssText='transform:scale(0.85);opacity:0;transition:all 0.3s;';
+  setTimeout(()=>i.remove(),300);
+}
+
+// ===== 添加额外学历 =====
+function addEduEntry(){
+  const list=document.getElementById('eduExtraList'),d=document.createElement('div');
+  d.className='exp-item edu-extra fade-in';
+  d.innerHTML=`<div class="exp-header">
+      <span style="font-size:12px;font-weight:700;color:#6366f1;">🎓 额外学历</span>
+      <button class="exp-remove" onclick="removeEduEntry(this)">×</button>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px;">
+      <input class="form-input" style="flex:1;" placeholder="学校名称" type="text">
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px;">
+      <select class="form-select" style="flex:1;">
+        <option value="">学历</option><option value="bachelor">本科</option>
+        <option value="master">硕士研究生</option><option value="phd">博士研究生</option>
+        <option value="junior_college">专科</option><option value="overseas">海外学历</option>
+      </select>
+      <select class="form-select" style="flex:1;">
+        <option value="">学校档次</option><option value="985">985</option><option value="211">211</option>
+        <option value="double_first">双一流</option><option value="regular">普通本科</option>
+        <option value="overseas_top">海外名校</option><option value="overseas">海外普通</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px;">
+      <input class="form-input" style="flex:1;" placeholder="所学专业" type="text">
+      <input class="form-input" style="flex:1;" placeholder="毕业年份" type="number" min="2010" max="2040">
+    </div>`;
+  list.appendChild(d);
+  playCoinSfx();
+  showToast('✅ 已添加额外学历条目');
+}
+function removeEduEntry(btn){
+  const i=btn.closest('.exp-item');
+  i.style.cssText='transform:scale(0.85);opacity:0;transition:all 0.3s;';
+  setTimeout(()=>i.remove(),300);
+}
+
+// ============================================================
+//  ===== 保存 & 恢复简历表单数据 =====
+// ============================================================
+function saveFormData() {
+  state.form = {
+    age: document.getElementById('userAge').value,
+    major: document.getElementById('userMajor').value,
+    degree: document.getElementById('userDegree').value,
+    grade: document.getElementById('userGrade').value,
+    school: document.getElementById('userSchool').value,
+    schoolLevel: document.getElementById('userSchoolLevel').value,
+    gradYear: document.getElementById('userGradYear').value,
+    gpa: document.getElementById('userGPA').value,
+    other: document.getElementById('otherAchieve').value,
+    // 保留打卡同步的经历（不覆盖）
+    internships: state.form.internships || [],
+    competitions: state.form.competitions || [],
+  };
+}
+function restoreFormData() {
+  const f = state.form;
+  if (!f) return;
+  if (f.age) document.getElementById('userAge').value = f.age;
+  if (f.major) document.getElementById('userMajor').value = f.major;
+  if (f.degree) document.getElementById('userDegree').value = f.degree;
+  if (f.grade) document.getElementById('userGrade').value = f.grade;
+  if (f.school) document.getElementById('userSchool').value = f.school;
+  if (f.schoolLevel) document.getElementById('userSchoolLevel').value = f.schoolLevel;
+  if (f.gradYear) document.getElementById('userGradYear').value = f.gradYear;
+  if (f.gpa) document.getElementById('userGPA').value = f.gpa;
+  if (f.other) document.getElementById('otherAchieve').value = f.other;
+
+  // 恢复打卡同步的实习经历
+  if (f.internships && f.internships.length) {
+    const list = document.getElementById('internshipList');
+    if (list) {
+      // 避免重复添加：先清空由打卡同步的条目（保留手动添加的）
+      list.querySelectorAll('.exp-item[data-from-checkin]').forEach(el => el.remove());
+      f.internships.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'exp-item fade-in';
+        div.setAttribute('data-from-checkin', '1');
+        div.innerHTML = `<div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.company||''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <input class="form-input" style="margin-top:6px;" value="${item.role||''}" placeholder="岗位名称" type="text">
+        <input class="form-input" style="margin-top:6px;" value="${item.note||''}" placeholder="主要工作内容" type="text">`;
+        list.appendChild(div);
+      });
+    }
+  }
+
+  // 恢复打卡同步的竞赛经历
+  if (f.competitions && f.competitions.length) {
+    const list = document.getElementById('competitionList');
+    if (list) {
+      list.querySelectorAll('.exp-item[data-from-checkin]').forEach(el => el.remove());
+      f.competitions.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'exp-item fade-in';
+        div.setAttribute('data-from-checkin', '1');
+        div.innerHTML = `<div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.compname||''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:6px;">
+          <input class="form-input" style="flex:1;" value="${item.award||''}" placeholder="获奖等级" type="text">
+        </div>`;
+        list.appendChild(div);
+      });
+    }
+  }
+}
+// 恢复标签选择状态
+function restoreTagSelections() {
+  const groups = ['industry','job','company','city','goal','eng','skill'];
+  groups.forEach(g => {
+    const vals = state.sel[g];
+    document.querySelectorAll(`[onclick*="'${g}'"]`).forEach(el => {
+      if (vals.includes(el.dataset.val)) el.classList.add('selected');
+    });
+  });
+}
+
+// ============================================================
+//  ===== 重新规划 =====
+// ============================================================
+function replanKeepData() {
+  saveFormData();
+  goToStep(1);
+  setTimeout(() => {
+    restoreFormData();
+    restoreTagSelections();
+    showToast('✏️ 已保留你的信息，可修改后重新生成');
+  }, 300);
+}
+function replanFresh() {
+  // 重置选择和表单，但保留金币和成就
+  state.sel = { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[] };
+  state.mbti = { answers:{}, result:null, q:0 };
+  state.form = {};
+  state.checkedNodes = {};
+  document.querySelectorAll('.tag-item.selected').forEach(el=>el.classList.remove('selected'));
+  ['userAge','userMajor','userGPA','userSchool','otherAchieve'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['userDegree','userGrade','userGradYear'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  goToStep(0);
+  showToast('🔄 已重置，开始新的冒险！');
+}
+
+// ============================================================
+//  ===== AI 驱动的规划生成（DeepSeek API） =====
+// ============================================================
+
+// 标签值到中文名的映射
+const labelMap = {
+  industry:{finance:'金融',internet:'互联网',ai:'人工智能',robot:'机器人',material:'材料科学',
+    biotech:'生物医药',energy:'新能源',auto:'新能源汽车',edu:'教育培训',commerce:'电商',
+    consult:'咨询管理',chip:'芯片半导体',space:'航空航天',media:'新媒体'},
+  job:{rd:'研发/技术',product:'产品设计',ops:'运营',sales:'市场/销售',finance_pos:'财务/会计',
+    research:'科研/学术',data:'数据分析',manage:'项目管理',civil:'公务员'},
+  company:{bigtech:'互联网大厂',soe:'国有企业',private:'民营企业',startup:'初创公司',
+    gov:'政府机构',public:'事业单位',foreign:'外资企业',research_inst:'科研院所',
+    academia:'高校教职',freelance:'自由职业'},
+  city:{beijing:'北京',shanghai:'上海',guangzhou:'广州',shenzhen:'深圳',hangzhou:'杭州',
+    chengdu:'成都',wuhan:'武汉',nanjing:'南京',xian:'西安',chongqing:'重庆',hefei:'合肥',
+    other_city:'其他城市',us:'美国',europe:'欧洲',singapore:'新加坡',hk:'香港'},
+  goal:{firstjob:'找到理想工作',phd:'深造读博',abroad_study:'出国留学',startup_goal:'自主创业',
+    public_goal:'考公考编',promote:'晋升管理层'},
+  eng:{cet4:'CET-4',cet6:'CET-6',ielts:'雅思',toefl:'托福',native:'母语水平'},
+  skill:{python:'Python',java:'Java',cpp:'C/C++',ml:'机器学习',finance_skill:'金融建模',
+    design:'UI设计',lab:'实验室技能'}
+};
+const levelMap = {bachelor:'本科',master:'硕士',phd:'博士'};
+const schoolLevelMap = {985:'985高校',211:'211高校',double_first:'双一流高校',regular:'普通本科',
+  junior_college:'专科/高职院校',overseas_top:'海外名校(QS前100)',overseas:'海外普通高校'};
+
+// 收集实习/竞赛/学术数据
+function collectExperienceData() {
+  const internships=[], competitions=[], publications=[];
+  document.querySelectorAll('#internshipList .exp-item').forEach(item=>{
+    const inputs = item.querySelectorAll('input');
+    internships.push({
+      company: inputs[0]?.value||'', role: inputs[1]?.value||'',
+      start: inputs[2]?.value||'', end: inputs[3]?.value||'', desc: inputs[4]?.value||''
+    });
+  });
+  document.querySelectorAll('#competitionList .exp-item').forEach(item=>{
+    const inputs = item.querySelectorAll('input');
+    competitions.push({name: inputs[0]?.value||'', award: inputs[1]?.value||'', year: inputs[2]?.value||''});
+  });
+  document.querySelectorAll('#publicationList .exp-item').forEach(item=>{
+    const inputs = item.querySelectorAll('input');
+    publications.push({title: inputs[0]?.value||'', type: item.querySelector('select')?.value||'', year: inputs[1]?.value||''});
+  });
+  return {internships, competitions, publications};
+}
+
+// 测试 API Key（支持服务端 Key 或用户自定义 Key）
+async function testApiKey() {
+  checkAIStatus();
+}
+
+// 调用 AI API
+async function askDeepSeek(systemPrompt, userMessage) {
+  // 通过后端代理调用 AI（服务端统一管理 API Key）
+  const resp = await fetch(API_BASE + '/api/ai/generate', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer ' + (localStorage.getItem('career_token')||'')
+    },
+    body:JSON.stringify({
+      system_prompt: systemPrompt,
+      user_message: userMessage
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err.msg || err.error || `API 返回 ${resp.status}`);
+  }
+
+  // 读取流式响应
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let fullContent = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('data: ')) {
+        const dataStr = trimmed.slice(6);
+        if (dataStr === '[DONE]') break;
+        try {
+          const j = JSON.parse(dataStr);
+          if (j.error) throw new Error(j.error);
+          if (j.content) fullContent += j.content;
+        } catch(e) {
+          if (e.message && !e.message.includes('JSON')) throw e;
+        }
+      }
+    }
+  }
+
+  // 提取JSON（可能被```json包裹）
+  const jsonMatch = fullContent.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('AI 返回了非 JSON 格式的内容');
+  return JSON.parse(jsonMatch[0]);
+}
+
+// 构建 AI Prompt
+function buildAIPrompt() {
+  const {industry,job,company,city,goal,eng,skill} = state.sel;
+  const f = state.form;
+  const mbtiType = state.mbti.result || '未知';
+  const expData = collectExperienceData();
+
+  const indNames = industry.map(v=>labelMap.industry[v]||v);
+  const jobNames = job.map(v=>labelMap.job[v]||v);
+  const compNames = company.map(v=>labelMap.company[v]||v);
+  const cityNames = city.map(v=>labelMap.city[v]||v);
+  const goalNames = goal.map(v=>labelMap.goal[v]||v);
+  const engNames = eng.map(v=>labelMap.eng[v]||v);
+  const skillNames = skill.map(v=>labelMap.skill[v]||v);
+  const degreeName = levelMap[f.degree]||f.degree||'未填写';
+  const schoolLv = schoolLevelMap[f.schoolLevel]||'未填写';
+
+  const userInfo = `年龄:${f.age||'未填写'} | 专业:${f.major||'未填写'} | 学历:${degreeName} | 年级:${glabel(f.grade)} | 学校:${f.school||'未填写'}(${schoolLv}) | 预计毕业:${f.gradYear||'未知'}年 | GPA:${f.gpa||'未填写'}`;
+  const prefInfo = `意向行业:${indNames.join('、')||'未选择'} | 岗位类型:${jobNames.join('、')||'未选择'} | 公司类型:${compNames.join('、')||'未选择'} | 期望城市:${cityNames.join('、')||'未选择'} | 五年目标:${goalNames.join('、')||'未选择'} | 英语:${engNames.join('、')||'无'} | 技能:${skillNames.join('、')||'无'} | MBTI:${mbtiType}`;
+
+  let expInfo = '';
+  if (expData.internships.length) expInfo += '\n实习经历:\n'+expData.internships.map((e,i)=>`${i+1}. ${e.company} ${e.role} (${e.start}~${e.end}) ${e.desc}`).join('\n');
+  if (expData.competitions.length) expInfo += '\n竞赛经历:\n'+expData.competitions.map((e,i)=>`${i+1}. ${e.name} ${e.award} (${e.year})`).join('\n');
+  if (expData.publications.length) expInfo += '\n学术成果:\n'+expData.publications.map((e,i)=>`${i+1}. ${e.title} (${e.type}, ${e.year})`).join('\n');
+  if (f.other) expInfo += '\n其他:'+f.other;
+
+  const systemPrompt = `你是一位资深的职画，擅长为大学生制定个性化的职业发展方案。请根据用户的基本信息、发展意向和经历，给出专业、具体、可操作的职业规划建议。
+
+你必须返回纯JSON格式，包含以下字段：
+{
+  "advices": [
+    {"icon":"emoji图标","title":"简短标题(6-10字)","text":"详细建议文本(80-150字)，要具体可操作"}
+  ],
+  "companies": [
+    {"name":"公司名称","logo":"一个最能代表该公司的emoji","desc":"该公司简介和推荐理由(30-50字)","tag":"推荐标签(如:大厂实习/央企秋招/投行暑期)"}
+  ],
+  "milestones": [
+    {"id":"n0","icon":"emoji","color":"#hex颜色","label":"简短标题(4-6字)","time":"时间范围","desc":"该阶段具体任务描述(30-50字)","checkinType":"text或internship或competition","checkinLabel":"打卡提示文字","done":false}
+  ]
+}
+
+要求：
+1. advices 提供3-5条个性化建议，必须结合用户的MBTI类型、学历档次、行业方向来写，不能泛泛而谈
+2. companies 推荐3-5家具体公司，必须真实存在，包含大厂、行业龙头、新锐公司，针对用户意向行业和岗位
+3. milestones 提供从当前阶段到毕业的6-9个里程碑节点，每个节点要具体到做什么、什么时间做
+4. milestones 的 id 从 n0 开始递增，checkinType 根据内容选择合适类型（text=纯文字记录,internship=实习记录,competition=竞赛记录）
+5. 所有建议必须考虑用户当前年级和毕业时间，倒推安排时间线
+6. 如果用户学历档次较高(985/211/海外名校)，可以建议更有野心的目标；如果是普通本科，建议务实的路径`;
+
+  const userMessage = `请为我制定职业规划。\n\n【基本信息】${userInfo}\n【发展意向】${prefInfo}\n${expInfo?'【已有经历】'+expInfo:'【已有经历】暂无'}`;
+
+  return {systemPrompt, userMessage};
+}
+
+// 重写 generatePlan：通过后端 AI 代理生成，保存数据到服务器
+async function generatePlan() {
+  saveFormData();
+  const {industry,company} = state.sel;
+  const grade = document.getElementById('userGrade').value;
+  const gradYear = document.getElementById('userGradYear').value;
+  const mbtiType = state.mbti.result || 'ENFP';
+
+  // 更新总结区域
+  const imap={finance:'💰',internet:'🌐',ai:'🤖',robot:'🦾',material:'🔬',chip:'💻',space:'🚀',energy:'⚡',biotech:'🧬',auto:'🚗',edu:'📚',ecommerce:'🛒',consult:'📊',media:'🎬'};
+  const indNames = industry.map(v=>({finance:'金融',internet:'互联网',ai:'人工智能',robot:'机器人',material:'材料',chip:'芯片',space:'航天',energy:'新能源',biotech:'生物医药',auto:'新能源汽车',edu:'教育培训',ecommerce:'电商',consult:'咨询',media:'新媒体'}[v]||v));
+  const indEmojis = industry.map(v=>imap[v]||'').filter(Boolean).join('');
+  const fnames = indNames.join('、') || '目标行业';
+  document.getElementById('summaryEmoji').textContent = indEmojis || '🦉';
+  document.getElementById('summaryTitle').textContent = `向${fnames}出发！`;
+  document.getElementById('summaryDesc').textContent = `基于 MBTI ${mbtiType} + ${fnames}方向，量身定制从${glabel(grade)}到毕业的闯关路线 🦉`;
+
+  // 立即跳转到结果页，展示加载动画 + 小游戏
+  const adviceList = document.getElementById('adviceList');
+  const aiLoading = document.getElementById('aiLoadingArea');
+  const aiError = document.getElementById('aiErrorArea');
+  adviceList.innerHTML = '';
+  aiLoading.style.display = 'block';
+  aiError.style.display = 'none';
+  goToStep(4);
+
+  // 启动小恐龙游戏
+  setTimeout(()=> startDinoGame(), 300);
+
+  // 尝试通过服务端 AI 生成
+  try {
+    const {systemPrompt, userMessage} = buildAIPrompt();
+    const result = await askDeepSeek(systemPrompt, userMessage);
+
+    // 停止小游戏，隐藏加载动画
+    stopDinoGame();
+    aiLoading.style.display = 'none';
+
+    // 渲染AI建议
+    let html = '';
+    if (result.advices && result.advices.length) {
+      html += result.advices.map((a,i)=>
+        `<div class="ai-suggestion-card fade-in" style="animation-delay:${i*0.1}s;">
+          <div class="sug-title">${a.icon||'💡'} ${a.title||'建议'}</div>
+          <div class="sug-text">${a.text||''}</div>
+        </div>`).join('');
+    }
+    // 渲染推荐公司（带招聘跳转链接）
+    if (result.companies && result.companies.length) {
+      html += `<div class="ai-suggestion-card fade-in" style="animation-delay:${(result.advices?.length||0)*0.1}s;">
+        <div class="sug-title">🏢 推荐目标公司 <span style="font-size:11px;color:#6366f1;font-weight:400;">（点击查看招聘信息 →）</span></div>
+        <div class="ai-company-list">${result.companies.map(c=>
+          `<div class="ai-company-item" onclick="showCompanyLinks('${(c.name||'').replace(/'/g,"\\'")}')" style="cursor:pointer;" title="点击查看 ${c.name||''} 的招聘信息">
+            <span class="ci-logo">${c.logo||'🏢'}</span>
+            <div class="ci-info">
+              <div class="ci-name">${c.name||''} <span style="font-size:10px;color:#6366f1;">→ 查看招聘</span></div>
+              <div class="ci-desc">${c.desc||''}</div>
+            </div>
+            ${c.tag?`<span class="ci-tag">${c.tag}</span>`:''}
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    adviceList.innerHTML = html;
+
+    // 用AI返回的milestones渲染路线图
+    if (result.milestones && result.milestones.length) {
+      state.milestones = result.milestones.map(m=>({
+        id: m.id||('n'+Math.random().toString(36).substr(2,4)),
+        icon: m.icon||'📍', color: m.color||'#6366f1',
+        label: m.label||'里程碑', time: m.time||'待定',
+        desc: m.desc||'', checkinType: m.checkinType||'text',
+        checkinLabel: m.checkinLabel||'记录你的经历', done: !!m.done
+      }));
+    } else {
+      state.milestones = genMilestones(grade, gradYear, industry, company);
+    }
+
+    renderHRoadmap();
+    addCoins(50, document.getElementById('summaryCard'));
+    playLevelupSfx();
+    addAchievement('🤖','AI 生成专属职业规划');
+    showToast('🤖 AI 规划生成成功！');
+
+    // 保存数据到服务器
+    await savePlanToServer(JSON.stringify(result));
+    return;
+  } catch(e) {
+    console.warn('AI generation failed, fallback:', e);
+    stopDinoGame();
+    aiLoading.style.display = 'none';
+    aiError.innerHTML = `<div class="ai-error">🤖 AI 生成失败：${e.message}<br>已自动切换为本地智能规划模式，你可以稍后重试。</div>`;
+    aiError.style.display = 'block';
+  }
+
+  // Fallback：本地生成
+  stopDinoGame();
+  aiLoading.style.display = 'none';
+  const advices = genAdvices(industry, company, mbtiType, grade);
+  adviceList.innerHTML = advices.map((a,i)=>
+    `<div class="advice-item fade-in" style="animation-delay:${i*0.08}s;">
+      <div class="advice-icon">${a.icon}</div>
+      <div class="advice-content"><strong>${a.title}</strong><p>${a.text}</p></div>
+    </div>`).join('');
+
+  state.milestones = genMilestones(grade, gradYear, industry, company);
+  renderHRoadmap();
+  addCoins(50, document.getElementById('summaryCard'));
+  playLevelupSfx();
+  addAchievement('🗺️','生成专属职业规划路线图');
+  showToast('🎉 路线图生成！获得金币+50！',3000);
+
+  // 即使使用本地生成，也保存到服务器
+  await savePlanToServer(null);
+}
+
+
+
+function glabel(g) {
+  return {freshman:'大一',sophomore:'大二',junior:'大三',senior:'大四',
+    master1:'研一',master2:'研二',master3:'研三',
+    phd1:'博一',phd2:'博二',phd3:'博三',phd4:'博四',phd5:'博五',graduated:'毕业后'}[g]||'当前';
+}
+
+function genAdvices(industry,company,mbti,grade) {
+  const d=mbtiData[mbti]||mbtiData['ENFP'],advs=[];
+  advs.push({icon:'🎯',title:`发挥 ${mbti} 型优势`,text:d.desc+'建议在求职中重点突出这些特质，选择能充分施展天赋的岗位。'});
+  if(industry.includes('ai')||industry.includes('internet')||industry.includes('chip'))
+    advs.push({icon:'💻',title:'技术能力建设',text:'深入学习Python/机器学习，参与GitHub开源项目，刷LeetCode算法题，大二/研一前完成核心技能栈。'});
+  if(industry.includes('finance'))
+    advs.push({icon:'💹',title:'金融行业敲门砖',text:'备考CFA/CPA，刷各大投行笔试题，争取大三/研一暑期拿到知名金融机构实习offer。'});
+  if(company.includes('bigtech')||company.includes('startup'))
+    advs.push({icon:'🏢',title:'大厂策略',text:'提前准备算法面试、产品案例、行为面试题。实习经历极其重要，尽早联系内部员工内推。'});
+  if(company.includes('soe')||company.includes('civil')||company.includes('public'))
+    advs.push({icon:'🏛️',title:'体制内求职路线',text:'国考通常11月笔试，提前半年系统备考行测+申论。同时关注央企校园招聘秋招项目。'});
+  advs.push({icon:'🌟',title:'简历亮点打造',text:'大厂实习>行业知名竞赛>校园重要职务。每段经历用STAR法则量化成果：情景→任务→行动→结果。'});
+  return advs;
+}
+
+function genMilestones(grade,gradYear,industry,company) {
+  const now=new Date().getFullYear();
+  const grYears={freshman:4,sophomore:3,junior:2,senior:1,master1:3,master2:2,master3:1,phd1:5,phd2:4,phd3:3,phd4:2,phd5:1,graduated:0};
+  const left=grYears[grade]!==undefined?grYears[grade]:2;
+  const gYear=parseInt(gradYear)||now+left;
+  const isGov=company.includes('civil')||company.includes('soe')||company.includes('public');
+  const isTech=industry.includes('ai')||industry.includes('internet')||industry.includes('chip');
+  const isFin=industry.includes('finance');
+  const nodes=[];
+  nodes.push({id:'n0',icon:'🦉',color:'#6633cc',label:'开启冒险',time:'📍 现在',desc:'明确方向，开始有针对性地积累经验',checkinType:'text',checkinLabel:'写下你的起航宣言',done:false});
+  if(left>=3) nodes.push({id:'n1',icon:'📚',color:'#3366ff',label:'打好基础',time:`${now+1}年`,desc:isTech?'刷算法、做项目、参加技术社团':isFin?'学金融建模，备考CFA L1':'扎实专业，参与科研项目',checkinType:'text',checkinLabel:'记录你的学习计划',done:false});
+  if(left>=2){
+    nodes.push({id:'n2',icon:'🏆',color:'#ff9900',label:'参加竞赛',time:`${now+Math.max(1,left-2)}年`,desc:isTech?'互联网+、ACM、挑战杯':isFin?'CFA大赛、证券投资大赛':'挑战杯、创青春、互联网+',checkinType:'competition',checkinLabel:'记录你参加的竞赛',done:false});
+    nodes.push({id:'n3',icon:'💼',color:'#00aa44',label:'第一次实习',time:`${now+Math.max(1,left-2)}年暑期`,desc:isGov?'国企/政府机关实习':isTech?'中小型互联网公司实习':'行业相关公司积累经验',checkinType:'internship',checkinLabel:'记录这段实习经历',done:false});
+  }
+  if(left>=1){
+    nodes.push({id:'n4',icon:'🌟',color:'#ff6633',label:'目标公司实习',time:`${gYear-1}年暑期`,desc:isGov?'参加央企/国企秋招':isTech?'冲击BAT/字节/华为大厂暑期实习':isFin?'冲击顶级投行/基金实习':'进入心仪公司实习，争取转正',checkinType:'internship',checkinLabel:'记录你的大厂/目标公司实习',done:false});
+  }
+  nodes.push({id:'n5',icon:'📋',color:'#9933cc',label:'秋招黄金季',time:`${gYear-1}年9-10月`,desc:'更新简历、准备面试、广投简历。秋招是最重要的求职窗口！',checkinType:'text',checkinLabel:'记录你的秋招准备情况',done:false});
+  if(!isGov) nodes.push({id:'n6',icon:'📝',color:'#cc4400',label:'笔试面试冲刺',time:`${gYear-1}年10-11月`,desc:'每天刷2道题，做3个模拟面试，准备网申笔试、技术/专业面试',checkinType:'text',checkinLabel:'记录你的面试经历',done:false});
+  else nodes.push({id:'n6',icon:'📝',color:'#cc4400',label:'国考/省考笔试',time:`${gYear-1}年11月`,desc:'提前6个月备考行测+申论，参加国考和目标省份省考',checkinType:'text',checkinLabel:'记录你的备考心得',done:false});
+  nodes.push({id:'n7',icon:'🎯',color:'#ff3366',label:'春招补录',time:`${gYear}年3-5月`,desc:'秋招未果可参加春招，持续优化简历，积极争取内推机会',checkinType:'text',checkinLabel:'春招进展记录',done:false});
+  nodes.push({id:'n8',icon:'🎓',color:'#ffd700',label:'毕业！',time:`${gYear}年6-7月`,desc:'带着积累的技能、人脉和经验，自信出发，开始新征程！',checkinType:'text',checkinLabel:'写下你的毕业感言',done:false});
+  return nodes;
+}
+
+// ============================================================
+//  ===== 横向职业闯关路径图 渲染 =====
+// ============================================================
+function renderHRoadmap() {
+  const track = document.getElementById('roadmapTrackH');
+  const nodeColors = state.milestones.map(m=>m.color);
+  let html = '<div class="rm-ground"></div>';
+  // 跑步角色
+  html += `<div class="rm-runner" id="rmRunner" style="left:30px;">${state.avatar}</div>`;
+
+  state.milestones.forEach((m, i) => {
+    const isDone = !!state.checkedNodes[m.id];
+    const nodeStyle = isDone
+      ? `background:linear-gradient(135deg,#ffd700,#ff9900);`
+      : `background:linear-gradient(135deg,${m.color},${m.color}99);`;
+    html += `
+      <div class="rm-node ${isDone?'done':''}" id="rn-${m.id}" data-idx="${i}" onclick="clickNode(${i})">
+        <div class="rm-node-inner" style="${nodeStyle}" title="${m.label}">
+          ${isDone?'🪙':m.icon}
+          ${isDone?`<span class="rm-flag">🚩</span>`:''}
+        </div>
+        <div class="rm-node-label">${m.label}</div>
+        <div class="rm-node-time">${m.time}</div>
+      </div>
+    `;
+    if (i < state.milestones.length - 1) {
+      html += `<div class="rm-connector ${isDone?'done-conn':''}"></div>`;
+    }
+  });
+  track.innerHTML = html;
+
+  // 把小人移到第一个已完成节点之后
+  const completedCount = state.milestones.filter(m=>state.checkedNodes[m.id]).length;
+  setTimeout(() => moveRunnerTo(completedCount), 300);
+}
+
+function moveRunnerTo(nodeIdx) {
+  const runner = document.getElementById('rmRunner');
+  if (!runner) return;
+  // 估算每个节点宽约120px（90节点+30连接），加上起始偏移
+  const x = 20 + nodeIdx * 120 + (nodeIdx>0?10:0);
+  runner.style.left = x + 'px';
+  runner.classList.add('moving');
+  setTimeout(()=>runner.classList.remove('moving'), 500);
+}
+
+// ============================================================
+//  ===== 路标打卡 =====
+// ============================================================
+let currentNodeIdx = -1;
+
+function clickNode(idx) {
+  const m = state.milestones[idx];
+  if (!m) return;
+  currentNodeIdx = idx;
+  const isDone = !!state.checkedNodes[m.id];
+  // 打开弹窗
+  document.getElementById('ciIcon').textContent = isDone ? '✅' : m.icon;
+  document.getElementById('ciTitle').textContent = isDone ? `已完成：${m.label}` : `打卡：${m.label}`;
+  document.getElementById('ciSubtitle').textContent = isDone ? '可以修改你的记录' : `${m.time} · ${m.desc}`;
+
+  const existing = state.checkedNodes[m.id] || {};
+  let bodyHtml = '';
+  if (m.checkinType === 'internship') {
+    bodyHtml = `
+      <div class="form-group"><div class="form-label">🏢 公司名称</div>
+        <input class="form-input" id="ci_company" placeholder="公司名称" value="${existing.company||''}"></div>
+      <div class="form-group"><div class="form-label">💼 岗位名称</div>
+        <input class="form-input" id="ci_role" placeholder="如：产品实习生" value="${existing.role||''}"></div>
+      <div class="form-group"><div class="form-label">📝 主要工作</div>
+        <textarea class="form-input" id="ci_note" rows="2" style="resize:none;" placeholder="简要描述你做了什么...">${existing.note||''}</textarea></div>
+    `;
+  } else if (m.checkinType === 'competition') {
+    bodyHtml = `
+      <div class="form-group"><div class="form-label">🏆 竞赛名称</div>
+        <input class="form-input" id="ci_compname" placeholder="竞赛名称" value="${existing.compname||''}"></div>
+      <div class="form-group"><div class="form-label">🥇 获奖情况</div>
+        <input class="form-input" id="ci_award" placeholder="如：国家级二等奖" value="${existing.award||''}"></div>
+      <div class="form-group"><div class="form-label">💬 感想</div>
+        <textarea class="form-input" id="ci_note" rows="2" style="resize:none;" placeholder="参赛感想...">${existing.note||''}</textarea></div>
+    `;
+  } else {
+    bodyHtml = `
+      <div class="form-group"><div class="form-label">✍️ ${m.checkinLabel}</div>
+        <textarea class="form-input" id="ci_note" rows="3" style="resize:none;" placeholder="写下你的经历或感想...">${existing.note||''}</textarea></div>
+    `;
+  }
+  document.getElementById('ciBody').innerHTML = bodyHtml;
+  document.getElementById('checkinModal').classList.add('open');
+  playJumpSfx();
+}
+
+function closeCheckin() {
+  document.getElementById('checkinModal').classList.remove('open');
+  currentNodeIdx = -1;
+}
+
+function confirmCheckin() {
+  if (currentNodeIdx < 0) return;
+  const m = state.milestones[currentNodeIdx];
+  const noteEl = document.getElementById('ci_note');
+  const note = noteEl ? noteEl.value.trim() : '';
+  if (!note) { showToast('✍️ 请先写下你的经历哦！'); noteEl && noteEl.focus(); return; }
+
+  // 收集额外字段
+  const extra = {};
+  ['ci_company','ci_role','ci_compname','ci_award'].forEach(id=>{
+    const el=document.getElementById(id); if(el) extra[id.replace('ci_','')]=el.value;
+  });
+  const wasNew = !state.checkedNodes[m.id];
+  state.checkedNodes[m.id] = { note, ...extra, time: new Date().toLocaleString('zh-CN') };
+  m.done = true;
+  closeCheckin();
+
+  if (wasNew) {
+    addCoins(state.powerup ? 20 : 10, document.getElementById('rn-'+m.id));
+    playCoinSfx();
+    addAchievement(m.icon, `路标打卡：${m.label}`);
+    showToast(`🪙 打卡成功！${m.label} +10金币！`, 2500);
+    // 同步简历
+    syncCheckinToResume(m, extra, note);
+    // 保存打卡记录到服务端
+    savePlanToServer(null).then(() => {
+      console.log('✅ 打卡记录已同步到服务端');
+    }).catch(e => {
+      console.warn('⚠️ 打卡记录同步失败:', e);
+    });
+  } else {
+    showToast('✅ 记录已更新！');
+    // 更新打卡记录到服务端
+    savePlanToServer(null).catch(e => console.warn('⚠️ 记录更新同步失败:', e));
+  }
+  // 重新渲染路线图
+  renderHRoadmap();
+  // 小人移动到当前节点
+  moveRunnerTo(currentNodeIdx + 1);
+}
+
+// 将打卡内容同步到简历信息（同时更新 state.form 确保持久化）
+function syncCheckinToResume(m, extra, note) {
+  if (m.checkinType === 'internship' && extra.company) {
+    // 更新 state.form（用于服务端持久化）
+    if (!state.form.internships) state.form.internships = [];
+    state.form.internships.push({ company: extra.company||'', role: extra.role||'', note });
+
+    // 更新 DOM（如果简历页面已渲染）
+    const list = document.getElementById('internshipList');
+    if (list) {
+      const div = document.createElement('div');
+      div.className = 'exp-item fade-in';
+      div.innerHTML = `<div class="exp-header">
+        <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${extra.company||''}" type="text">
+        <button class="exp-remove" onclick="removeExp(this)">×</button>
+      </div>
+      <input class="form-input" style="margin-top:6px;" value="${extra.role||''}" placeholder="岗位名称" type="text">
+      <input class="form-input" style="margin-top:6px;" value="${note}" placeholder="主要工作内容" type="text">`;
+      list.appendChild(div);
+      showToast('📋 实习经历已同步到简历！', 2500);
+    }
+  } else if (m.checkinType === 'competition' && extra.compname) {
+    // 更新 state.form
+    if (!state.form.competitions) state.form.competitions = [];
+    state.form.competitions.push({ compname: extra.compname||'', award: extra.award||'' });
+
+    // 更新 DOM
+    const list = document.getElementById('competitionList');
+    if (list) {
+      const div = document.createElement('div');
+      div.className = 'exp-item fade-in';
+      div.innerHTML = `<div class="exp-header">
+        <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${extra.compname||''}" type="text">
+        <button class="exp-remove" onclick="removeExp(this)">×</button>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:6px;">
+        <input class="form-input" style="flex:1;" value="${extra.award||''}" placeholder="获奖等级" type="text">
+      </div>`;
+      list.appendChild(div);
+      showToast('🏆 竞赛经历已同步到简历！', 2500);
+    }
+  }
+}
+
+// ============================================================
+//  ===== 吐司 =====
+// ============================================================
+function showToast(msg, dur=2200) {
+  const t=document.getElementById('toastMsg');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ============================================================
+//  ===== 初始化 =====
+// ============================================================
+// ============================================================
+//  ===== 小恐龙闯关游戏 (等待时消遣) =====
+// ============================================================
+let dinoGame = {
+  running: false, over: false, score: 0, animId: null,
+  dino: null, obstacles: [], frame: 0, speed: 3, W: 0, H: 0, ctx: null, canvas: null
+};
+
+function dinoDrawGround() {
+  const g = dinoGame;
+  g.ctx.fillStyle = '#ddd';
+  g.ctx.fillRect(0, g.H-12, g.W, 3);
+}
+
+function dinoDrawDino() {
+  const g = dinoGame, d = g.dino;
+  g.ctx.fillStyle = '#555';
+  g.ctx.fillRect(d.x, d.y, d.w, d.h);
+  g.ctx.fillStyle = '#444';
+  g.ctx.fillRect(d.x+18, d.y-10, 16, 18);
+  g.ctx.fillStyle = 'white';
+  g.ctx.fillRect(d.x+28, d.y-6, 4, 4);
+  const legOff = (g.frame % 20 < 10) ? 3 : -3;
+  g.ctx.fillStyle = '#444';
+  g.ctx.fillRect(d.x+4, d.y+d.h, 6, 10+legOff);
+  g.ctx.fillRect(d.x+18, d.y+d.h, 6, 10-legOff);
+}
+
+function dinoDrawObstacle(ob) {
+  const g = dinoGame;
+  g.ctx.fillStyle = '#2d7d3a';
+  g.ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+  g.ctx.fillRect(ob.x-5, ob.y+5, 6, 12);
+  g.ctx.fillRect(ob.x+ob.w-1, ob.y+8, 6, 10);
+}
+
+function dinoJump() {
+  const d = dinoGame.dino;
+  if (d.onGround) { d.vy = -13; d.onGround = false; }
+}
+
+function dinoLoop() {
+  const g = dinoGame;
+  if (!g.running) return;
+  g.ctx.clearRect(0, 0, g.W, g.H);
+  dinoDrawGround();
+
+  // 重力
+  g.dino.vy += 0.7;
+  g.dino.y += g.dino.vy;
+  if (g.dino.y >= g.H-40) { g.dino.y = g.H-40; g.dino.vy = 0; g.dino.onGround = true; }
+  dinoDrawDino();
+
+  // 生成障碍物
+  if (g.frame % Math.max(80, 120-g.speed*5) === 0) {
+    g.obstacles.push({ x: g.W+10, y: g.H-55, w: 14, h: 36 });
+  }
+
+  // 更新障碍物 + 碰撞检测
+  g.obstacles = g.obstacles.filter(ob => {
+    ob.x -= g.speed;
+    dinoDrawObstacle(ob);
+    const d = g.dino;
+    if (ob.x < d.x+d.w && ob.x+ob.w > d.x && ob.y < d.y+d.h && ob.y+ob.h > d.y) {
+      g.over = true;
+      g.running = false;
+      g.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      g.ctx.fillRect(0, 0, g.W, g.H);
+      g.ctx.fillStyle = 'white';
+      g.ctx.font = 'bold 18px sans-serif';
+      g.ctx.textAlign = 'center';
+      g.ctx.fillText('游戏结束！', g.W/2, g.H/2-10);
+      g.ctx.font = '13px sans-serif';
+      g.ctx.fillText('点击或按空格重来', g.W/2, g.H/2+15);
+      return false;
+    }
+    return ob.x > -30;
+  });
+
+  // 分数
+  if (!g.over) {
+    g.score = Math.floor(g.frame / 6);
+    g.speed = Math.min(8, 3 + g.score / 200);
+  }
+  g.ctx.fillStyle = '#888';
+  g.ctx.font = '12px monospace';
+  g.ctx.textAlign = 'right';
+  g.ctx.fillText('🏆 ' + g.score, g.W-10, 20);
+
+  // 云朵
+  g.ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  const cx = ((g.frame * 0.5) % (g.W+40)) - 20;
+  g.ctx.beginPath();
+  g.ctx.arc(cx, 25, 10, 0, Math.PI*2);
+  g.ctx.arc(cx+12, 22, 13, 0, Math.PI*2);
+  g.ctx.arc(cx+24, 25, 10, 0, Math.PI*2);
+  g.ctx.fill();
+
+  g.frame++;
+  if (!g.over) g.animId = requestAnimationFrame(dinoLoop);
+  const scoreEl = document.getElementById('dinoScore');
+  if (scoreEl) scoreEl.textContent = '分数: ' + g.score;
+}
+
+function startDinoGame() {
+  const canvas = document.getElementById('dinoGame');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  dinoGame = {
+    running: true, over: false, score: 0, animId: null,
+    dino: { x:40, y:H-40, w:28, h:36, vy:0, onGround:true },
+    obstacles: [], frame: 0, speed: 3, W, H, ctx, canvas
+  };
+
+  if (dinoGame.animId) cancelAnimationFrame(dinoGame.animId);
+
+  // 事件监听
+  dinoGame._jh = (e) => {
+    if (e.type === 'keydown' && e.code !== 'Space') return;
+    e.preventDefault();
+    if (dinoGame.over) { startDinoGame(); return; }
+    dinoJump();
+  };
+  document.removeEventListener('keydown', dinoGame._jhOld);
+  canvas.removeEventListener('click', dinoGame._jhOld);
+  dinoGame._jhOld = dinoGame._jh;
+  document.addEventListener('keydown', dinoGame._jh);
+  canvas.addEventListener('click', dinoGame._jh);
+
+  dinoLoop();
+}
+
+function stopDinoGame() {
+  dinoGame.running = false;
+  if (dinoGame.animId) cancelAnimationFrame(dinoGame.animId);
+  document.removeEventListener('keydown', dinoGame._jhOld);
+  if (dinoGame.canvas) dinoGame.canvas.removeEventListener('click', dinoGame._jhOld);
+}
+
+// ============================================================
+window.addEventListener('load', () => {
+  try {
+    // 初始化金币格子
+    updateCoinGrid();
+    // 初始化应用（检查登录状态）
+    initApp();
+    // 自动启动BGM（需要用户交互触发）
+    document.addEventListener('click', function startBGM() {
+      if (state.soundOn) playBGM();
+      document.removeEventListener('click', startBGM);
+    }, { once: true });
+    // 设置玩家角色
+    document.getElementById('player').textContent = state.avatar;
+  } catch(e) {
+    console.error('Load error:', e);
+    document.body.innerHTML = '<div style="padding:40px;color:red;font-size:16px;">页面加载出错：' + e.message + '<br><br>请按F12打开控制台查看详细错误。</div>';
+  }
+});
+</script>
+</body>
+</html>
