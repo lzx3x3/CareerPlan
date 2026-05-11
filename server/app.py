@@ -638,6 +638,23 @@ def create_ai_engine():
     return jsonify({'ok': True, 'msg': '引擎已添加', 'engine_id': engine_id})
 
 
+@app.route('/api/ai-engines/<int:engine_id>', methods=['GET'])
+@login_required
+def get_ai_engine_detail(engine_id):
+    """获取单个引擎的完整配置（含 api_key，仅供前端编辑回显）"""
+    engine = get_ai_engine_full(engine_id, g.user_id)
+    if not engine:
+        return jsonify({'ok': False, 'msg': '引擎不存在'}), 404
+    # 对 api_key 做脱敏，前端编辑时显示掩码，用户改了才传新值
+    key = engine.get('api_key', '')
+    if key:
+        engine['masked_key'] = key[:4] + '****' + key[-4:] if len(key) > 8 else '****'
+    else:
+        engine['masked_key'] = ''
+    engine.pop('api_key', None)
+    return jsonify({'ok': True, 'engine': engine})
+
+
 @app.route('/api/ai-engines/<int:engine_id>', methods=['PUT'])
 @login_required
 def modify_ai_engine(engine_id):

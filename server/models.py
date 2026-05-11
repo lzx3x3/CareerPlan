@@ -253,13 +253,23 @@ def save_career_plan(user_id: int, form_data: dict, selected_tags: dict,
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         if existing:
-            conn.execute(
-                """UPDATE career_plans SET
-                   form_data=?, selected_tags=?, mbti_result=?, ai_plan=?,
-                   plan_title=?, api_model=?, updated_at=?
-                   WHERE user_id = ?""",
-                (form_json, tags_json, mbti_json, ai_plan, plan_title, api_model, now, user_id)
-            )
+            if ai_plan is None:
+                # 草稿暂存：不覆盖已有的 AI 规划
+                conn.execute(
+                    """UPDATE career_plans SET
+                       form_data=?, selected_tags=?, mbti_result=?,
+                       plan_title=?, api_model=?, updated_at=?
+                       WHERE user_id = ?""",
+                    (form_json, tags_json, mbti_json, plan_title, api_model, now, user_id)
+                )
+            else:
+                conn.execute(
+                    """UPDATE career_plans SET
+                       form_data=?, selected_tags=?, mbti_result=?, ai_plan=?,
+                       plan_title=?, api_model=?, updated_at=?
+                       WHERE user_id = ?""",
+                    (form_json, tags_json, mbti_json, ai_plan, plan_title, api_model, now, user_id)
+                )
             return existing['id']
         else:
             cursor = conn.execute(
