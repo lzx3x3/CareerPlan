@@ -3119,6 +3119,11 @@ function buildJobLinks(company, position) {
   const c = encodeURIComponent(company || '');
   return [
     {
+      label: '📋 智联招聘',
+      url: `https://www.zhaopin.com/sou/?keyword=${q}`,
+      primary: false
+    },
+    {
       label: '🔍 Boss直聘',
       url: `https://www.zhipin.com/web/geek/job?query=${q}`,
       primary: true
@@ -3126,11 +3131,6 @@ function buildJobLinks(company, position) {
     {
       label: '🎓 实习僧',
       url: `https://www.shixiseng.com/interns?keyword=${q}`,
-      primary: false
-    },
-    {
-      label: '📋 智联招聘',
-      url: `https://www.zhaopin.com/sou/?keyword=${q}`,
       primary: false
     }
   ];

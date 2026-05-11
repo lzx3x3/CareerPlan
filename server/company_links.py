@@ -83,6 +83,12 @@ def get_company_links(company_name: str, city: str = '') -> list:
     # ===== 普通企业：使用常规招聘平台 =====
     links = [
         {
+            'name': '智联招聘',
+            'url': f'https://www.zhaopin.com/sou/?keyword={encoded}',
+            'icon': '📋',
+            'desc': '综合招聘'
+        },
+        {
             'name': '实习僧',
             'url': f'https://www.shixiseng.com/interns?keyword={encoded}',
             'icon': '🎓',
@@ -93,12 +99,6 @@ def get_company_links(company_name: str, city: str = '') -> list:
             'url': f'https://www.zhipin.com/web/geek/job?query={encoded}',
             'icon': '💼',
             'desc': '社招/实习'
-        },
-        {
-            'name': '智联招聘',
-            'url': f'https://www.zhaopin.com/sou/?keyword={encoded}',
-            'icon': '📋',
-            'desc': '综合招聘'
         },
         {
             'name': '前程无忧',
