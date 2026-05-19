@@ -275,64 +275,13 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 /* ===== 趣味加载区域 ===== */
 .ai-loading-fun{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 10px 14px;}
 
-/* 小猫绕圈跑 */
+/* 小恐龙游戏 */
 .mini-game-wrap{width:100%;max-width:340px;text-align:center;}
 .mini-game-title{font-size:13px;font-weight:700;color:#555;margin-bottom:8px;}
 .mini-game-hint{font-size:11px;color:#aaa;margin-top:6px;}
 .mini-game-score{font-size:12px;font-weight:700;color:#6366f1;margin-top:4px;}
 #dinoGame{display:block;margin:0 auto;border-radius:10px;background:#f8f9ff;
   border:2px solid rgba(99,102,241,0.15);}
-.cat-run-wrap{width:100%;max-width:340px;text-align:center;margin-top:8px;}
-.cat-run-title{font-size:13px;font-weight:700;color:#555;margin-bottom:10px;}
-.cat-run-track{position:relative;width:180px;height:180px;margin:0 auto;
-  border-radius:50%;border:3px dashed rgba(0,0,0,0.12);
-  display:flex;align-items:center;justify-content:center;}
-.cat-run-track-line{position:absolute;inset:8px;border-radius:50%;
-  border:2px solid rgba(99,102,241,0.15);pointer-events:none;}
-.cat-runner{position:absolute;top:-8px;left:50%;transform:translateX(-50%);
-  animation:cat-chase 2.6s linear infinite;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));}
-.cat-svg{display:block;}
-/* 小猫绕圈：沿圆形轨道跑，自身朝向始终沿切线方向 */
-@keyframes cat-chase{
-  0%{transform:translateX(-50%) rotate(0deg) translateY(-76px) rotate(-0deg);}
-  25%{transform:translateX(-50%) rotate(90deg) translateY(-76px) rotate(-90deg);}
-  50%{transform:translateX(-50%) rotate(180deg) translateY(-76px) rotate(-180deg);}
-  75%{transform:translateX(-50%) rotate(270deg) translateY(-76px) rotate(-270deg);}
-  100%{transform:translateX(-50%) rotate(360deg) translateY(-76px) rotate(-360deg);}
-}
-/* 尾巴摆动 */
-.cat-tail-anim{transform-origin:50% 100%;animation:tail-wag 0.3s ease-in-out infinite alternate;}
-@keyframes tail-wag{
-  0%{transform:rotate(-20deg);}
-  100%{transform:rotate(20deg);}
-}
-/* 跑步腿动画 */
-.cat-leg-f{animation:leg-run-f 0.3s ease-in-out infinite;}
-.cat-leg-b{animation:leg-run-b 0.3s ease-in-out infinite;}
-@keyframes leg-run-f{
-  0%,100%{transform:rotate(-15deg);transform-origin:top center;}
-  50%{transform:rotate(15deg);}
-}
-@keyframes leg-run-b{
-  0%,100%{transform:rotate(15deg);transform-origin:top center;}
-  50%{transform:rotate(-15deg);}
-}
-.cat-run-shadow{width:18px;height:6px;background:rgba(0,0,0,0.15);border-radius:50%;
-  margin:2px auto 0;animation:cat-shadow 2.6s ease-in-out infinite;}
-@keyframes cat-shadow{
-  0%,100%{transform:scale(0.7);opacity:0.4;}
-  50%{transform:scale(1.1);opacity:0.7;}
-}
-.cat-run-star{position:absolute;font-size:12px;animation:star-pop 1.2s ease-in-out infinite;}
-.cat-star-1{top:-6px;right:-2px;animation-delay:0s;}
-.cat-star-2{bottom:20px;left:-8px;animation-delay:0.4s;font-size:10px;}
-.cat-star-3{bottom:0;right:10px;animation-delay:0.8s;font-size:11px;}
-@keyframes star-pop{
-  0%,100%{transform:scale(0.6) rotate(-10deg);opacity:0.4;}
-  50%{transform:scale(1.3) rotate(10deg);opacity:1;}
-}
-.cat-run-hint{font-size:11px;color:#aaa;margin-top:8px;}
 .ai-powered-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6366f1,#8b5cf6);
   color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;margin-left:6px;
   box-shadow:0 2px 0 rgba(0,0,0,0.2);}
@@ -472,7 +421,7 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 .roadmap-scroll-wrap::-webkit-scrollbar-track{background:rgba(0,0,0,0.1);border-radius:3px;}
 .roadmap-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.5);border-radius:3px;}
 .roadmap-track-h{position:relative;display:flex;align-items:flex-end;gap:0;
-  min-width:max-content;padding:60px 20px 20px;}
+  min-width:max-content;padding:60px 20px 50px;overflow:visible;}
 /* 地面 */
 .rm-ground{position:absolute;bottom:0;left:0;right:0;height:36px;
   background:repeating-linear-gradient(90deg,#8b6914 0,#8b6914 46px,#6b4f10 46px,#6b4f10 48px);
@@ -502,12 +451,31 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 .rm-node-inner:hover{transform:scale(1.18) translateY(-5px);box-shadow:0 8px 0 rgba(0,0,0,0.2),0 0 16px rgba(255,215,0,0.6);}
 .rm-node.done .rm-node-inner{background:linear-gradient(135deg,#ffd700,#ff9900)!important;
   box-shadow:0 5px 0 rgba(0,0,0,0.25),0 0 20px rgba(255,215,0,0.7);}
-.rm-node.done .rm-node-inner::after{content:'🪙';position:absolute;top:-20px;right:-10px;font-size:18px;
-  animation:coin-float 1.2s ease-in-out infinite;}
 .rm-node.locked .rm-node-inner{filter:grayscale(0.7) brightness(0.7);cursor:not-allowed;}
-.rm-node-label{font-size:10px;font-weight:800;color:white;text-align:center;margin-top:6px;
-  text-shadow:1px 1px 0 rgba(0,0,0,0.5);max-width:80px;line-height:1.3;}
+.rm-node-label{font-size:10px;font-weight:800;color:#2d3748;text-align:center;margin-top:6px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.6);max-width:80px;line-height:1.3;}
 .rm-node-time{display:none;} /* 时间改在地面坐标轴上显示 */
+.rm-treasure-hint{
+  font-size:9px;color:#ff9500;font-weight:600;margin-top:4px;padding:3px 6px;
+  background:linear-gradient(135deg,#fff8e1,#fff3cd);border-radius:10px;
+  border:1px solid #ffd54f;cursor:pointer;animation:hintPulse 2s ease-in-out infinite;
+  text-align:center;max-width:85px;
+}
+.rm-treasure-hint:hover{background:linear-gradient(135deg,#fff3cd,#ffe082);transform:scale(1.05);}
+.rm-diamond-hint{
+  font-size:16px;cursor:pointer;margin-top:4px;
+  animation:diamondFloat 2s ease-in-out infinite;
+  display:flex;justify-content:center;align-items:center;
+}
+.rm-diamond-hint:hover{transform:scale(1.3);}
+@keyframes diamondFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-3px);}
+}
+@keyframes hintPulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:0.8;transform:scale(0.98);}
+}
 /* 路标之间的连接点 */
 .rm-connector{width:30px;height:8px;display:flex;align-items:center;justify-content:center;
   position:relative;bottom:52px;flex-shrink:0;}
@@ -517,8 +485,8 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 /* 路标旗杆 */
 .rm-flag{position:absolute;top:-28px;right:-8px;font-size:16px;animation:flag-wave 1s ease-in-out infinite alternate;}
 @keyframes flag-wave{from{transform:rotate(-5deg);}to{transform:rotate(5deg);}}
-/* 小马里奥人在路线上 */
-.rm-runner{position:absolute;bottom:26px;font-size:28px;transition:left 0.8s cubic-bezier(0.34,1.56,0.64,1);
+/* 小马里奥人在路线上（下移到坐标轴下方，避免与路标文字重叠） */
+.rm-runner{position:absolute;bottom:-28px;font-size:28px;transition:left 0.8s cubic-bezier(0.34,1.56,0.64,1);
   filter:drop-shadow(2px 2px 0 rgba(0,0,0,0.3));z-index:10;}
 @keyframes rm-run{0%,100%{transform:scaleX(1);}50%{transform:scaleX(0.88);}}
 .rm-runner.moving{animation:rm-run 0.3s ease infinite;}
@@ -557,6 +525,174 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
   font-weight:700;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;
   box-shadow:0 4px 12px rgba(0,0,0,0.3);white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== 百宝箱 ===== */
+.treasure-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,30,0.95);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  z-index:2000;animation:fadeIn 0.3s;
+}
+.treasure-modal.show{display:flex;}
+.treasure-close{
+  position:absolute;top:20px;right:20px;width:36px;height:36px;
+  background:rgba(255,255,255,0.1);border:none;border-radius:50%;
+  color:white;font-size:24px;cursor:pointer;line-height:36px;
+  transition:all 0.3s;z-index:10;
+}
+.treasure-close:hover{background:rgba(255,255,255,0.2);transform:scale(1.1);}
+.treasure-chest{
+  position:relative;width:120px;height:100px;margin-bottom:30px;
+  animation:chestBob 2s ease-in-out infinite;
+}
+@keyframes chestBob{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+}
+.chest-base{
+  position:absolute;bottom:0;left:0;right:0;height:50px;
+  background:linear-gradient(135deg,#8B4513,#D2691E);
+  border-radius:0 0 10px 10px;border:3px solid #5D3A1A;
+  box-shadow:inset 0 -10px 20px rgba(0,0,0,0.3);
+}
+.chest-base::before{
+  content:'';position:absolute;top:15px;left:50%;transform:translateX(-50%);
+  width:20px;height:20px;background:#FFD700;border-radius:50%;
+  border:3px solid #B8860B;box-shadow:0 0 10px #FFD700;
+}
+.chest-lid{
+  position:absolute;top:5px;left:0;right:0;height:45px;
+  background:linear-gradient(135deg,#A0522D,#D2691E);
+  border-radius:10px 10px 0 0;border:3px solid #5D3A1A;
+  transform-origin:bottom center;transition:transform 0.5s;
+}
+.chest-lock{position:absolute;top:35px;left:50%;transform:translateX(-50%);
+  font-size:24px;z-index:2;transition:all 0.3s;}
+.chest-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:150px;height:150px;background:radial-gradient(circle,rgba(255,215,0,0.4) 0%,transparent 70%);
+  opacity:0;transition:opacity 0.5s;pointer-events:none;
+}
+.treasure-modal.opened .chest-lid{transform:rotateX(-120deg);}
+.treasure-modal.opened .chest-glow{opacity:1;animation:pulseGlow 1s ease infinite;}
+.treasure-modal.opened .chest-lock{transform:translateX(-50%) scale(0);opacity:0;}
+@keyframes pulseGlow{
+  0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}
+  50%{transform:translate(-50%,-50%) scale(1.2);opacity:1;}
+}
+.treasure-particles{position:absolute;width:100%;height:100%;pointer-events:none;}
+.particle{
+  position:absolute;font-size:20px;animation:particleFly 1s ease-out forwards;
+}
+@keyframes particleFly{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0;}
+}
+.treasure-message{
+  text-align:center;color:white;margin-bottom:20px;min-height:80px;
+  max-height:45vh;padding-right:6px;
+}
+.treasure-message.has-scroll{overflow-y:auto;}
+.tm-icon{font-size:40px;margin-bottom:10px;animation:tmBounce 1s ease infinite;}
+@keyframes tmBounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-5px);}
+}
+.tm-title{font-size:20px;font-weight:900;margin-bottom:8px;
+  text-shadow:2px 2px 4px rgba(0,0,0,0.5);}
+.tm-content{font-size:14px;opacity:0.9;line-height:1.5;max-width:280px;}
+.tm-dots{display:flex;justify-content:center;gap:4px;margin-top:12px;}
+.tm-dots span{
+  width:6px;height:6px;background:#FFD700;border-radius:50%;
+  animation:dotBounce 1.4s ease-in-out infinite;
+}
+.tm-dots span:nth-child(2){animation-delay:0.2s;}
+.tm-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dotBounce{
+  0%,80%,100%{transform:scale(1);opacity:0.5;}
+  40%{transform:scale(1.5);opacity:1;}
+}
+.treasure-btn{
+  padding:12px 30px;background:linear-gradient(135deg,#FFD700,#FFA500);
+  border:none;border-radius:25px;font-size:15px;font-weight:900;color:#5D3A1A;
+  cursor:pointer;box-shadow:0 4px 15px rgba(255,215,0,0.4);
+  transition:all 0.3s;animation:btnPulse 2s ease infinite;
+}
+.treasure-btn:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(255,215,0,0.6);}
+.treasure-btn:active{transform:scale(0.95);}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 4px 15px rgba(255,215,0,0.4);}
+  50%{box-shadow:0 4px 25px rgba(255,215,0,0.7);}
+}
+
+/* ===== AI反馈弹窗 ===== */
+.feedback-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,30,0.9);
+  display:none;align-items:center;justify-content:center;
+  z-index:2000;padding:20px;
+}
+.feedback-modal.show{display:flex;}
+.feedback-container{
+  background:white;border-radius:20px;width:100%;max-width:500px;
+  max-height:80vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  animation:slideUp 0.3s ease;
+}
+@keyframes slideUp{
+  from{transform:translateY(50px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+.feedback-header{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  padding:20px;color:white;display:flex;align-items:center;gap:12px;
+}
+.fh-icon{font-size:32px;}
+.fh-title{flex:1;font-size:18px;font-weight:900;}
+.fh-close{
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(255,255,255,0.2);color:white;font-size:20px;
+  cursor:pointer;transition:background 0.2s;
+}
+.fh-close:hover{background:rgba(255,255,255,0.3);}
+.feedback-content{
+  padding:20px;overflow-y:auto;flex:1;font-size:15px;line-height:1.8;
+  color:#333;max-height:50vh;
+}
+.feedback-content p{margin-bottom:12px;}
+.feedback-content strong{color:#667eea;}
+.feedback-footer{
+  padding:15px 20px;border-top:1px solid #eee;
+  display:flex;flex-direction:column;gap:10px;
+}
+.ff-tip{font-size:12px;color:#888;text-align:center;}
+.ff-btn{width:100%;padding:12px;font-size:15px;}
+
+/* ===== 路标调整弹窗 ===== */
+.adjust-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,30,0.9);
+  display:none;align-items:center;justify-content:center;
+  z-index:2000;padding:20px;
+}
+.adjust-modal.show{display:flex;}
+.adjust-container{
+  background:white;border-radius:20px;width:100%;max-width:450px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:slideUp 0.3s ease;
+}
+.adjust-header{
+  background:linear-gradient(135deg,#f093fb,#f5576c);
+  padding:20px;color:white;display:flex;align-items:center;gap:12px;
+}
+.ah-icon{font-size:28px;}
+.ah-title{flex:1;font-size:18px;font-weight:900;}
+.adjust-content{padding:20px;font-size:14px;line-height:1.7;color:#444;}
+.ac-reason{
+  margin-top:15px;padding:12px;background:#f8f9fa;border-radius:10px;
+  font-size:13px;color:#666;border-left:3px solid #f5576c;
+}
+.adjust-footer{
+  padding:15px 20px;border-top:1px solid #eee;
+  display:flex;gap:10px;
+}
+.adjust-footer button{flex:1;padding:12px;font-size:14px;}
 
 /* ===== 通用工具 ===== */
 .fade-in{animation:fadeIn 0.5s ease both;}
@@ -657,7 +793,7 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 .rp-export-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
   border:none;color:white;display:flex;align-items:center;gap:4px;transition:opacity 0.2s;}
 .rp-export-btn.pdf{background:linear-gradient(135deg,#ef4444,#dc2626);}
-.rp-export-btn.word{background:linear-gradient(135deg,#2563eb,#1d4ed);}
+.rp-export-btn.word{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
 .rp-export-btn.print{background:linear-gradient(135deg,#059669,#047857);}
 .rp-export-btn:active{opacity:0.8;}
 
@@ -1362,6 +1498,7 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
             <input class="form-input" style="flex:1;" placeholder="获奖等级" type="text">
             <input class="form-input" style="flex:1;" placeholder="年份" type="text">
           </div>
+          <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="具体内容（项目描述、个人贡献、技术栈等）" type="text"></textarea>
         </div>
       </div>
       <button class="add-btn" onclick="addCompetition()">＋ 添加竞赛经历</button>
@@ -1381,6 +1518,7 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
             </select>
             <input class="form-input" style="flex:1;" placeholder="年份" type="text">
           </div>
+          <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="具体内容（研究内容、发表期刊、我的贡献等）" type="text"></textarea>
         </div>
       </div>
       <button class="add-btn" onclick="addPublication()">＋ 添加学术成果</button>
@@ -1428,52 +1566,12 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
         <div class="ai-loading-fun">
           <!-- 等待文字 -->
           <div class="ai-loading-text">AI 正在分析你的信息，生成专属规划<span class="dots"></span></div>
-          <!-- 小猫绕圈跑动画 -->
-          <div class="cat-run-wrap">
-            <div class="cat-run-title">🐱 小猫陪你等～</div>
-            <div class="cat-run-track">
-              <div class="cat-run-track-line"></div>
-              <div class="cat-runner" id="catRunner">
-                <svg class="cat-svg" viewBox="0 0 64 64" width="36" height="36">
-                  <!-- 黑猫身体 -->
-                  <ellipse cx="32" cy="40" rx="18" ry="14" fill="#1a1a1a"/>
-                  <!-- 黑猫头 -->
-                  <circle cx="32" cy="22" r="14" fill="#1a1a1a"/>
-                  <!-- 耳朵 -->
-                  <polygon points="20,14 24,2 30,14" fill="#1a1a1a"/>
-                  <polygon points="44,14 40,2 34,14" fill="#1a1a1a"/>
-                  <!-- 内耳 -->
-                  <polygon points="23,13 25,5 29,13" fill="#ff8a65"/>
-                  <polygon points="41,13 39,5 35,13" fill="#ff8a65"/>
-                  <!-- 眼睛 -->
-                  <ellipse cx="27" cy="21" rx="2.8" ry="3.2" fill="#fff"/>
-                  <ellipse cx="37" cy="21" rx="2.8" ry="3.2" fill="#fff"/>
-                  <ellipse cx="27" cy="21" rx="1.6" ry="2.2" fill="#1a1a1a"/>
-                  <ellipse cx="37" cy="21" rx="1.6" ry="2.2" fill="#1a1a1a"/>
-                  <!-- 鼻子 -->
-                  <ellipse cx="32" cy="26" rx="1.8" ry="1.2" fill="#ff8a65"/>
-                  <!-- 嘴巴 -->
-                  <path d="M 29 28 Q 32 32 35 28" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>
-                  <!-- 尾巴 -->
-                  <path class="cat-tail-anim" d="M 50 44 Q 60 30 56 18" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
-                  <!-- 腿（跑步姿态） -->
-                  <rect class="cat-leg-f" x="24" y="52" width="5" height="8" rx="2" fill="#1a1a1a"/>
-                  <rect class="cat-leg-b" x="35" y="52" width="5" height="8" rx="2" fill="#1a1a1a"/>
-                </svg>
-                <div class="cat-run-shadow"></div>
-              </div>
-              <div class="cat-run-star cat-star-1">⭐</div>
-              <div class="cat-run-star cat-star-2">✨</div>
-              <div class="cat-run-star cat-star-3">💫</div>
-            </div>
-            <div class="cat-run-hint">看小黑猫卖力跑步 💨</div>
-          </div>
           <!-- 小恐龙游戏 -->
           <div class="mini-game-wrap">
             <div class="mini-game-title">🎮 等得太无聊？来玩一局！</div>
             <canvas id="dinoGame" width="320" height="120"></canvas>
             <div class="mini-game-hint">空格键 / 点击屏幕 → 跳跃 ⬆️</div>
-            <div class="mini-game-score" id="dinoScore">分数: 0</div>
+            <div class="mini-game-score" id="dinoScore">分数: 0 | 连击: 0</div>
           </div>
         </div>
       </div>
@@ -1653,6 +1751,63 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
     <div style="display:flex;gap:10px;margin-top:14px;">
       <button class="btn-secondary" style="flex:1;" onclick="closeCheckin()">取消</button>
       <button class="btn-primary" style="flex:1;margin:0;" onclick="confirmCheckin()">✅ 确认打卡，领取🪙</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 百宝箱弹窗 ===== -->
+<div class="treasure-modal" id="treasureModal">
+  <button class="treasure-close" onclick="closeTreasureBox()">×</button>
+  <div class="treasure-chest" id="treasureChest">
+    <div class="chest-base"></div>
+    <div class="chest-lid" id="chestLid"></div>
+    <div class="chest-lock" id="chestLock">🔒</div>
+    <div class="chest-glow" id="chestGlow"></div>
+  </div>
+  <div class="treasure-particles" id="treasureParticles"></div>
+  <div class="treasure-message" id="treasureMessage">
+    <div class="tm-icon">✨</div>
+    <div class="tm-title" id="tmTitle">准备开启...</div>
+    <div class="tm-content" id="tmContent">正在生成专属反馈</div>
+    <div class="tm-dots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="treasure-btn" id="treasureBtn" onclick="openTreasureChest()">
+    <span id="treasureBtnText">🎁 点击开启百宝箱</span>
+  </div>
+</div>
+
+<!-- ===== AI反馈弹窗 ===== -->
+<div class="feedback-modal" id="feedbackModal">
+  <div class="feedback-container">
+    <div class="feedback-header">
+      <div class="fh-icon">🦉</div>
+      <div class="fh-title">职业规划师点评</div>
+      <button class="fh-close" onclick="closeFeedback()">×</button>
+    </div>
+    <div class="feedback-content" id="feedbackContent">
+      <!-- 动态内容 -->
+    </div>
+    <div class="feedback-footer">
+      <div class="ff-tip">💡 点击下方路标继续你的冒险！</div>
+      <button class="btn-primary ff-btn" onclick="closeFeedback()">继续冒险 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 路标调整确认弹窗 ===== -->
+<div class="adjust-modal" id="adjustModal">
+  <div class="adjust-container">
+    <div class="adjust-header">
+      <div class="ah-icon">🔮</div>
+      <div class="ah-title">路标已优化</div>
+    </div>
+    <div class="adjust-content" id="adjustContent">
+      <p>根据你刚才的精彩表现，我对后续路标进行了优化调整！</p>
+      <div class="ac-reason" id="acReason"></div>
+    </div>
+    <div class="adjust-footer">
+      <button class="btn-secondary" onclick="keepOldMilestones()">保留原路标</button>
+      <button class="btn-primary" onclick="applyAdjustedMilestones()">应用新路标 ✨</button>
     </div>
   </div>
 </div>
@@ -2005,6 +2160,7 @@ async function loadUserPlan() {
         document.getElementById('heroCharDisplay').textContent = state.avatar;
         document.getElementById('player').textContent = state.avatar;
         document.getElementById('rmRunner').textContent = state.avatar;
+        document.getElementById('userAvatarBtn').textContent = state.avatar;
         // 更新头像选择高亮
         document.querySelectorAll('.avatar-opt').forEach(a => {
           a.classList.toggle('selected', a.dataset.char === state.avatar);
@@ -2020,7 +2176,6 @@ async function loadUserPlan() {
     if (plan.selected_tags) {
       // 先提取并恢复自定义标签（重建 labelMap + customTags）
       const savedCustomTags = plan.selected_tags._customTags;
-      console.log('[loadUserPlan] savedCustomTags:', JSON.stringify(savedCustomTags));
       if (savedCustomTags) {
         const groups = ['industry','job','company','city','goal','eng','skill'];
         groups.forEach(g => {
@@ -2030,7 +2185,6 @@ async function loadUserPlan() {
             // 重建 labelMap 映射
             if (!labelMap[g]) labelMap[g] = {};
             savedCustomTags[g].forEach(t => { labelMap[g][t.val] = t.label; });
-            console.log(`[loadUserPlan] Restored ${savedCustomTags[g].length} custom tags for ${g}:`, savedCustomTags[g].map(t=>t.val+'=>'+t.label).join(', '));
           }
         });
       }
@@ -2039,7 +2193,7 @@ async function loadUserPlan() {
       allGroups.forEach(g => {
         (plan.selected_tags[g]||[]).forEach(v => {
           if (v.startsWith('custom_') && (!labelMap[g] || !labelMap[g][v])) {
-            console.warn(`[loadUserPlan] WARN: ${g}.${v} has no labelMap entry! customTags has:`, customTags[g]?.map(t=>t.val));
+            // 无法解析的custom标签，静默跳过
           }
         });
       });
@@ -2087,6 +2241,10 @@ async function loadUserPlan() {
           // 恢复打卡记录
           if (aiResult.checkedNodes) {
             state.checkedNodes = aiResult.checkedNodes;
+          }
+          // 恢复宝箱开启记录
+          if (aiResult.treasureOpenedFor) {
+            state.treasureOpenedFor = aiResult.treasureOpenedFor;
           }
 
           // ===== 恢复 AI 建议列表和公司推荐 =====
@@ -2200,7 +2358,6 @@ async function autoSaveDraft() {
         api_model: ''
       })
     });
-    console.log('[autoSaveDraft] 已暂存草稿，step:', state.step, 'has_ai_plan:', !!aiPlanPayload);
   } catch(e) {
     console.warn('[autoSaveDraft] 暂存失败:', e);
   }
@@ -2225,6 +2382,7 @@ async function savePlanToServer(aiPlanJson) {
       if (existing.ok && existing.plan && existing.plan.ai_plan) {
         const obj = JSON.parse(existing.plan.ai_plan);
         obj.checkedNodes = state.checkedNodes;
+        obj.treasureOpenedFor = state.treasureOpenedFor;
         // 同步里程碑的 done 状态
         if (obj.milestones) {
           obj.milestones = obj.milestones.map(m => ({
@@ -2251,7 +2409,7 @@ async function savePlanToServer(aiPlanJson) {
     })
   });
   if (res.ok) {
-    console.log('✅ 规划数据已保存到服务器');
+    // 保存成功
   } else {
     console.warn('⚠️ 规划数据保存失败:', res.msg);
   }
@@ -2380,16 +2538,11 @@ async function addNewEngine() {
       body: JSON.stringify({ name: name || '未命名引擎', api_key: apiKey, base_url: baseUrl, model: model })
     });
     if (res.ok) {
-      showToast('✅ 引擎已添加');
+      showToast('✅ 引擎已添加并激活');
       // 清空输入框并折叠面板
       cancelEditEngine();
       // 重新加载列表
       await loadAiEngines();
-      // 自动选中刚添加的引擎
-      if (res.engine_id) {
-        document.getElementById('engineSelect').value = res.engine_id;
-        onEngineSelectChange();
-      }
     } else {
       showToast('❌ 添加失败: ' + (res.msg || '未知错误'));
     }
@@ -2440,10 +2593,8 @@ async function testEngineById(engineId) {
     showToast('🔄 正在测试连接...');
     const res = await api(`/api/ai-engines/${engineId}/test`, { method: 'POST' });
     if (res.ok) {
-      showToast(`✅ 测试通过！模型: ${res.model || '未知'}`);
+      showToast(`✅ 测试通过！该引擎已激活，模型: ${res.model || '未知'}`);
       await loadAiEngines();
-      // 重新选中
-      document.getElementById('engineSelect').value = engineId;
     } else {
       showToast(`❌ 测试失败: ${res.msg || '连接错误'}`);
       await loadAiEngines();
@@ -2526,10 +2677,6 @@ async function saveUserAiKey() {
       showToast('✅ AI 配置已保存为引擎');
       document.getElementById('userApiKeyInput').value = '';
       await loadAiEngines();
-      if (res.engine_id) {
-        document.getElementById('engineSelect').value = res.engine_id;
-        onEngineSelectChange();
-      }
     }
   } catch(e) {
     showToast('❌ 保存失败');
@@ -2651,15 +2798,21 @@ function renderResumePreview() {
   const degree = degreeMap[f.degree]||f.degree||'';
   const grade  = gradeMap[f.grade]||f.grade||'';
   const schoolLvl = schoolLvlMap[f.schoolLevel]||'';
-  const skills = (sel.skill||[]).map(v=>skillMap[v]||v);
-  const engs   = (sel.eng||[]).map(v=>engMap[v]||v);
-  const indNames = (sel.industry||[]).slice(0,5).map(v=>indMap[v]||v);
-  const jobNames = (sel.job||[]).slice(0,3).map(v=>({rd:'研发/技术',product:'产品设计',ops:'运营',sales:'市场/销售',finance_pos:'财务/会计',research:'科研/学术',data:'数据分析',manage:'项目管理'})[v]||v);
+  // 使用 labelMap 解析标签（支持自定义标签）
+  const _resolveLabel = (group, v) => {
+    if (labelMap[group] && labelMap[group][v]) return labelMap[group][v];
+    const ct = customTags[group] && customTags[group].find(t => t.val === v);
+    return ct ? ct.label : v;
+  };
+  const skills = (sel.skill||[]).map(v=>skillMap[v]||_resolveLabel('skill',v));
+  const engs   = (sel.eng||[]).map(v=>engMap[v]||_resolveLabel('eng',v));
+  const indNames = (sel.industry||[]).slice(0,5).map(v=>indMap[v]||_resolveLabel('industry',v));
+  const jobNames = (sel.job||[]).slice(0,3).map(v=>({rd:'研发/技术',product:'产品设计',ops:'运营',sales:'市场/销售',finance_pos:'财务/会计',research:'科研/学术',data:'数据分析',manage:'项目管理'})[v]||_resolveLabel('job',v));
 
   // 实习经历
   const ints = (f.internships||[]).filter(i=>i.company||i.role);
   // 竞赛
-  const comps = (f.competitions||[]).filter(c=>c.compname||c.award);
+  const comps = (f.competitions||[]).filter(c=>c.name||c.compname||c.award);
   // 证书
   const certs = (f.certs||[]).filter(c=>c.type||c.name);
   // 学术
@@ -2683,11 +2836,11 @@ function renderResumePreview() {
         ${jobNames.length ? sec('意向岗位', jobNames.map(n=>`<span class="rp-tag">${n}</span>`).join(' ')) : ''}
       </div>
       <div class="rp-right">
-        ${ints.length ? sec('实习经历', ints.map(i=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:12px;">${i.company||''}</div><div style="font-size:11px;color:#555;margin-top:1px;">${i.role||''}${i.note ? ' · '+i.note : ''}</div></div>`).join('')) : sec('实习经历','<span style="color:#ccc;font-size:11px;">暂无实习经历</span>')}
-        ${comps.length ? sec('竞赛 & 荣誉', comps.map(c=>`<div style="margin-bottom:5px;font-size:11px;">🏆 ${c.compname||''}${c.award ? ' · '+c.award : ''}</div>`).join('')) : ''}
+        ${ints.length ? sec('实习经历', ints.map(i=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:12px;">${i.company||''}</div><div style="font-size:11px;color:#555;margin-top:1px;">${i.role||''}${i.note ? ' · '+i.note : ''}${i.detail ? '<br><span style="color:#888;">'+i.detail+'</span>' : ''}${i.feeling ? '<br><span style="color:#666;font-style:italic;">'+i.feeling+'</span>' : ''}</div></div>`).join('')) : sec('实习经历','<span style="color:#ccc;font-size:11px;">暂无实习经历</span>')}
+        ${comps.length ? sec('竞赛 & 荣誉', comps.map(c=>`<div style="margin-bottom:6px;font-size:11px;">🏆 ${c.name||c.compname||''}${c.award ? ' · '+c.award : ''}${c.note ? '<br><span style="color:#888;">'+c.note+'</span>' : ''}${c.feeling ? '<br><span style="color:#666;font-style:italic;">'+c.feeling+'</span>' : ''}</div>`).join('')) : ''}
         ${certs.length ? sec('证书', certs.map(c=>`<span class="rp-tag">${c.name||c.type||''}${c.grade?' '+c.grade:''}</span>`).join(' ')) : ''}
         ${f.other ? sec('其他荣誉',`<div style="font-size:11px;color:#555;">${f.other}</div>`) : ''}
-        ${pubs.length ? sec('学术成果', pubs.map(p=>`<div style="margin-bottom:5px;font-size:11px;">📄 ${p.title||''} ${p.type?'· '+p.type:''}</div>`).join('')) : ''}
+        ${pubs.length ? sec('学术成果', pubs.map(p=>`<div style="margin-bottom:6px;font-size:11px;">📄 ${p.title||''} ${p.type?'· '+p.type:''}${p.note ? '<br><span style="color:#888;">'+p.note+'</span>' : ''}${p.feeling ? '<br><span style="color:#666;font-style:italic;">'+p.feeling+'</span>' : ''}</div>`).join('')) : ''}
       </div>
     </div>`;
 
@@ -2699,8 +2852,8 @@ function renderResumePreview() {
     <div class="rp-body">
       <div>
         ${schoolLvl ? sec('教育背景',`<div style="font-weight:700;">${f.school||''}</div><div style="font-size:11px;color:#666;">${schoolLvl} · ${f.major} · ${degree}</div>`):''}
-        ${ints.length ? sec('实习经历', ints.map(i=>`<div style="margin-bottom:7px;"><span style="font-weight:700;">${i.company||''}</span>${i.role ? ' · '+i.role : ''}<br><span style="font-size:10px;color:#888;">${i.note||''}</span></div>`).join('')) : '<div style="font-size:11px;color:#ccc;">暂无实习经历</div>'}
-        ${comps.length ? sec('竞赛荣誉', comps.map(c=>`<div style="font-size:11px;">🏆 ${c.compname}${c.award?' · '+c.award:''}</div>`).join('')) : ''}
+        ${ints.length ? sec('实习经历', ints.map(i=>`<div style="margin-bottom:7px;"><span style="font-weight:700;">${i.company||''}</span>${i.role ? ' · '+i.role : ''}<br><span style="font-size:10px;color:#888;">${i.note||''}${i.detail ? '<br>'+i.detail : ''}</span>${i.feeling ? '<br><span style="font-size:10px;color:#666;font-style:italic;">'+i.feeling+'</span>' : ''}</div>`).join('')) : '<div style="font-size:11px;color:#ccc;">暂无实习经历</div>'}
+        ${comps.length ? sec('竞赛荣誉', comps.map(c=>`<div style="font-size:11px;">🏆 ${c.name||c.compname||''}${c.award?' · '+c.award:''}${c.note ? '<br><span style="color:#888;">'+c.note+'</span>' : ''}</div>`).join('')) : ''}
       </div>
       <div>
         ${skills.length?sec('专业技能',skills.map(s=>`<span class="rp-tag">${s}</span>`).join(' ')):''}
@@ -2718,8 +2871,8 @@ function renderResumePreview() {
     </div>
     <div class="rp-body">
       ${schoolLvl?sec('教育',`${schoolLvl} · ${f.school} · ${f.major} · ${degree}`):''}
-      ${ints.length?sec('实习经历',ints.map(i=>`<div style="margin-bottom:6px;"><b>${i.company||''}</b>${i.role?' · '+i.role:''}<br><span style="font-size:11px;color:#666;">${i.note||''}</span></div>`).join('')):'<div style="color:#ccc;font-size:11px;">暂无实习</div>'}
-      ${comps.length?sec('竞赛',comps.map(c=>`• ${c.compname}${c.award?' · '+c.award:''}`).join('<br>')):''}
+      ${ints.length?sec('实习经历',ints.map(i=>`<div style="margin-bottom:6px;"><b>${i.company||''}</b>${i.role?' · '+i.role:''}<br><span style="font-size:11px;color:#666;">${i.note||''}${i.detail?'<br>'+i.detail:''}</span>${i.feeling?'<br><span style="font-size:11px;color:#888;font-style:italic;">'+i.feeling+'</span>':''}</div>`).join('')):'<div style="color:#ccc;font-size:11px;">暂无实习</div>'}
+      ${comps.length?sec('竞赛',comps.map(c=>`<div>• ${c.name||c.compname||''}${c.award?' · '+c.award:''}${c.note?'<br><span style="color:#888;font-size:10px;">'+c.note+'</span>':''}</div>`).join('')):''}
       ${skills.length?sec('技能',skills.join(' / ')):''}
       ${engs.length?sec('语言',engs.join(' / ')):''}
       ${certs.length?sec('证书',certs.map(c=>(c.name||c.type||'')+(c.grade?' '+c.grade:'')).join(' / ')):''}
@@ -2732,8 +2885,8 @@ function renderResumePreview() {
     </div>
     <div class="rp-body">
       <div class="rp-card">${schoolLvl?`<div style="font-weight:700;font-size:13px;">${f.school}</div><div style="font-size:11px;color:#666;margin-top:2px;">${schoolLvl} · ${f.major} · ${degree}</div>`:'<span style="color:#ccc;">请完善教育信息</span>'}</div>
-      <div class="rp-card">${ints.length?ints.map(i=>`<div style="margin-bottom:6px;"><span style="font-weight:700;">${i.company||''}</span> ${i.role?'· '+i.role:''}<br><span style="font-size:10px;color:#888;">${i.note||''}</span></div>`).join(''):'<span style="color:#ccc;font-size:11px;">暂无实习经历</span>'}</div>
-      <div class="rp-card">${comps.length?comps.map(c=>`<div style="font-size:11px;margin-bottom:4px;">🏆 ${c.compname||''}${c.award?' · '+c.award:''}</div>`).join(''):''}${f.other?`<div style="font-size:11px;color:#555;margin-top:4px;">${f.other}</div>`:''}</div>
+      <div class="rp-card">${ints.length?ints.map(i=>`<div style="margin-bottom:6px;"><span style="font-weight:700;">${i.company||''}</span> ${i.role?'· '+i.role:''}<br><span style="font-size:10px;color:#888;">${i.note||''}${i.detail?'<br>'+i.detail:''}</span>${i.feeling?'<br><span style="font-size:10px;color:#666;font-style:italic;">'+i.feeling+'</span>':''}</div>`).join(''):'<span style="color:#ccc;font-size:11px;">暂无实习经历</span>'}</div>
+      <div class="rp-card">${comps.length?comps.map(c=>`<div style="font-size:11px;margin-bottom:4px;">🏆 ${c.name||c.compname||''}${c.award?' · '+c.award:''}${c.note?'<br><span style="color:#888;">'+c.note+'</span>':''}${c.feeling?'<br><span style="color:#666;font-style:italic;">'+c.feeling+'</span>':''}</div>`).join(''):''}${f.other?`<div style="font-size:11px;color:#555;margin-top:4px;">${f.other}</div>`:''}</div>
       <div class="rp-card">${skills.length?skills.map(s=>`<span class="rp-tag">${s}</span>`).join(' '):''}${engs.length?`<div style="margin-top:4px;font-size:11px;color:#666;">${engs.join(' / ')}</div>`:''}</div>
       ${certs.length?`<div class="rp-card">${certs.map(c=>`<span class="rp-tag">${c.name||c.type||''}${c.grade?' '+c.grade:''}</span>`).join(' ')}</div>`:''}
     </div>`;
@@ -2885,7 +3038,7 @@ async function analyzeResume() {
 - 英语水平：${engNames||'未填写'}
 - 证书：${certs||'无'}
 - 实习经历：${(f.internships||[]).length>0?(f.internships.map(i=>`${i.company}(${i.role})`).join('、')):'无'}
-- 竞赛经历：${(f.competitions||[]).length>0?(f.competitions.map(c=>`${c.compname}(${c.award||''})`).join('、')):'无'}
+- 竞赛经历：${(f.competitions||[]).length>0?(f.competitions.map(c=>`${c.name||c.compname||''}(${c.award||''})`).join('、')):'无'}
 - 其他荣誉：${f.other||'无'}`.trim();
 
     const systemPrompt = `你是一名专业的HR和职业顾问，擅长简历诊断和优化建议。
@@ -3488,11 +3641,134 @@ const state = {
   soundOn: true,
   milestones: [],     // 路标数据
   checkedNodes: {},   // {nodeId: {note, extra, time}}
+  treasureOpenedFor: {}, // {nodeId: {opened: true, data: {...}}}
   sel: { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[], cert:[] },
   mbti: { answers:{}, result:null, q:0 },
   form: {},           // 简历保留数据
   resumeStyle: 'classic', // 简历预览当前风格
 };
+
+// ============================================================
+// 统一简历数据管理器 - 让路标打卡、简历表单、简历预览三者联动
+// ============================================================
+const ResumeDataManager = {
+  // 统一数据结构
+  data: {
+    basic: { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'', other:'' },
+    internships: [],   // {company, role, start, end, note, detail, feeling}
+    competitions: [],  // {name, award, year, note, feeling}
+    publications: [],  // {title, type, year, note, feeling}
+    certs: [],         // {type, name, grade, year}
+    otherExperiences: [] // {label, note, detail, feeling}
+  },
+
+  // 从 state.form 加载数据（初始化或恢复时使用）
+  loadFromForm() {
+    const f = state.form || {};
+    this.data.basic = {
+      age: f.age || '',
+      major: f.major || '',
+      degree: f.degree || '',
+      grade: f.grade || '',
+      school: f.school || '',
+      schoolLevel: f.schoolLevel || '',
+      gradYear: f.gradYear || '',
+      gpa: f.gpa || '',
+      other: f.other || ''
+    };
+    this.data.internships = f.internships || [];
+    this.data.competitions = f.competitions || [];
+    this.data.publications = f.publications || [];
+    this.data.certs = f.certs || [];
+    this.data.otherExperiences = f.otherExperiences || [];
+    return this.data;
+  },
+
+  // 同步到 state.form（保存时使用）
+  syncToForm() {
+    if (!state.form) state.form = {};
+    Object.assign(state.form, this.data.basic);
+    state.form.internships = this.data.internships;
+    state.form.competitions = this.data.competitions;
+    state.form.publications = this.data.publications;
+    state.form.certs = this.data.certs;
+    state.form.otherExperiences = this.data.otherExperiences;
+    return state.form;
+  },
+
+  // 添加实习经历（路标打卡或表单添加时调用）
+  addInternship(item) {
+    this.data.internships.push({
+      company: item.company || '',
+      role: item.role || '',
+      start: item.start || '',
+      end: item.end || '',
+      note: item.note || '',
+      detail: item.detail || '',
+      feeling: item.feeling || ''
+    });
+    this.syncToForm();
+    return this.data.internships;
+  },
+
+  // 添加竞赛经历
+  addCompetition(item) {
+    this.data.competitions.push({
+      name: item.name || item.compname || '',
+      award: item.award || '',
+      year: item.year || '',
+      note: item.note || '',
+      feeling: item.feeling || ''
+    });
+    this.syncToForm();
+    return this.data.competitions;
+  },
+
+  // 添加学术成果
+  addPublication(item) {
+    this.data.publications.push({
+      title: item.title || item.pubname || '',
+      type: item.type || item.pubtype || '',
+      year: item.year || '',
+      note: item.note || '',
+      feeling: item.feeling || ''
+    });
+    this.syncToForm();
+    return this.data.publications;
+  },
+
+  // 从打卡同步（统一入口，根据类型自动路由）
+  syncFromCheckin(milestone, extra, note, feeling) {
+    const m = milestone;
+    if (m.checkinType === 'internship' && extra.company) {
+      this.addInternship({ company: extra.company, role: extra.role, note, detail: extra.detail, feeling });
+    } else if (m.checkinType === 'competition' && (extra.compname || extra.name)) {
+      this.addCompetition({ name: extra.compname, award: extra.award, note, feeling });
+    } else if (m.checkinType === 'publication' && (extra.pubname || extra.title)) {
+      this.addPublication({ title: extra.pubname, type: extra.pubtype, note, feeling });
+    } else if (note || extra.detail || feeling) {
+      this.data.otherExperiences.push({
+        label: m.label || '',
+        note: note || '',
+        detail: extra.detail || '',
+        feeling: feeling || ''
+      });
+      this.syncToForm();
+    }
+  },
+
+  // 清空所有数据
+  clear() {
+    this.data.basic = { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'', other:'' };
+    this.data.internships = [];
+    this.data.competitions = [];
+    this.data.publications = [];
+    this.data.certs = [];
+    this.data.otherExperiences = [];
+    this.syncToForm();
+  }
+};
+
 
 // ============================================================
 //  ===== Web Audio BGM (马里奥风格合成) =====
@@ -3867,6 +4143,7 @@ function selectAvatar(el) {
   state.avatar = el.dataset.char;
   document.getElementById('heroCharDisplay').textContent = state.avatar;
   document.getElementById('player').textContent = state.avatar;
+  document.getElementById('userAvatarBtn').textContent = state.avatar;
   addCoins(1, el);
   playCoinSfx();
 }
@@ -4155,21 +4432,36 @@ function addInternship(){
   d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="公司名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
     <input class="form-input" style="margin-top:6px;" placeholder="岗位名称" type="text">
     <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="开始时间" type="month"><input class="form-input" style="flex:1;" placeholder="结束时间" type="month"></div>
-    <input class="form-input" style="margin-top:6px;" placeholder="主要工作内容" type="text">`;
+    <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="主要工作内容"></textarea>
+    <details style="margin-top:6px;font-size:12px;color:#666;">
+      <summary style="cursor:pointer;">📝 详细内容与感悟（可选）</summary>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细内容（项目细节、个人贡献等）"></textarea>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="心得感悟（收获、反思等）"></textarea>
+    </details>`;
   l.appendChild(d);
 }
 function addCompetition(){
   const l=document.getElementById('competitionList'),d=document.createElement('div');
   d.className='exp-item fade-in';
   d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="竞赛名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
-    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="获奖等级" type="text"><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>`;
+    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="获奖等级" type="text"><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>
+    <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="具体内容（项目描述、个人贡献、技术栈等）"></textarea>
+    <details style="margin-top:6px;font-size:12px;color:#666;">
+      <summary style="cursor:pointer;">💬 参赛感想（可选）</summary>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="参赛心得、收获等"></textarea>
+    </details>`;
   l.appendChild(d);
 }
 function addPublication(){
   const l=document.getElementById('publicationList'),d=document.createElement('div');
   d.className='exp-item fade-in';
   d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;" placeholder="论文/专利名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
-    <div style="display:flex;gap:7px;margin-top:6px;"><select class="form-select" style="flex:1;"><option value="">成果类型</option><option>期刊论文</option><option>会议论文</option><option>专利</option></select><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>`;
+    <div style="display:flex;gap:7px;margin-top:6px;"><select class="form-select" style="flex:1;"><option value="">成果类型</option><option>期刊论文</option><option>会议论文</option><option>专利</option><option>软件著作权</option><option>其他</option></select><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>
+    <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="具体内容（研究内容、发表期刊、我的贡献等）"></textarea>
+    <details style="margin-top:6px;font-size:12px;color:#666;">
+      <summary style="cursor:pointer;">💬 心得感悟（可选）</summary>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="研究/发表心得等"></textarea>
+    </details>`;
   l.appendChild(d);
 }
 function removeExp(btn){
@@ -4219,7 +4511,8 @@ function removeEduEntry(btn){
 //  ===== 保存 & 恢复简历表单数据 =====
 // ============================================================
 function saveFormData() {
-  state.form = {
+  // 使用 ResumeDataManager 保存数据
+  ResumeDataManager.data.basic = {
     age: document.getElementById('userAge').value,
     major: document.getElementById('userMajor').value,
     degree: document.getElementById('userDegree').value,
@@ -4229,15 +4522,24 @@ function saveFormData() {
     gradYear: document.getElementById('userGradYear').value,
     gpa: document.getElementById('userGPA').value,
     other: document.getElementById('otherAchieve').value,
-    // 保留打卡同步的经历（不覆盖）
-    internships: state.form.internships || [],
-    competitions: state.form.competitions || [],
-    certs: collectCertData(),
   };
+  // 收集动态列表数据（从 DOM 读取最新值）
+  const expData = collectExperienceData();
+  ResumeDataManager.data.internships = expData.internships;
+  ResumeDataManager.data.competitions = expData.competitions;
+  ResumeDataManager.data.publications = expData.publications;
+  ResumeDataManager.data.certs = collectCertData();
+
+  // 同步到 state.form（用于服务端持久化）
+  ResumeDataManager.syncToForm();
 }
 function restoreFormData() {
-  const f = state.form;
-  if (!f) return;
+  // 使用 ResumeDataManager 加载数据
+  ResumeDataManager.loadFromForm();
+  const data = ResumeDataManager.data;
+
+  // 恢复基本信息
+  const f = data.basic;
   if (f.age) document.getElementById('userAge').value = f.age;
   if (f.major) document.getElementById('userMajor').value = f.major;
   if (f.degree) document.getElementById('userDegree').value = f.degree;
@@ -4248,13 +4550,15 @@ function restoreFormData() {
   if (f.gpa) document.getElementById('userGPA').value = f.gpa;
   if (f.other) document.getElementById('otherAchieve').value = f.other;
 
-  // 恢复打卡同步的实习经历
-  if (f.internships && f.internships.length) {
-    const list = document.getElementById('internshipList');
-    if (list) {
-      // 避免重复添加：先清空由打卡同步的条目（保留手动添加的）
-      list.querySelectorAll('.exp-item[data-from-checkin]').forEach(el => el.remove());
-      f.internships.forEach(item => {
+  // 恢复实习经历（包含完整字段）
+  const internshipList = document.getElementById('internshipList');
+  if (internshipList) {
+    // 先清除所有已有项（包括默认空框），再恢复
+    internshipList.innerHTML = '';
+    // 过滤掉已保存的全空条目
+    const validItems = data.internships.filter(item => item.company || item.role || item.note);
+    if (validItems.length) {
+      validItems.forEach(item => {
         const div = document.createElement('div');
         div.className = 'exp-item fade-in';
         div.setAttribute('data-from-checkin', '1');
@@ -4263,40 +4567,79 @@ function restoreFormData() {
           <button class="exp-remove" onclick="removeExp(this)">×</button>
         </div>
         <input class="form-input" style="margin-top:6px;" value="${item.role||''}" placeholder="岗位名称" type="text">
-        <input class="form-input" style="margin-top:6px;" value="${item.note||''}" placeholder="主要工作内容" type="text">`;
-        list.appendChild(div);
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="主要工作内容">${item.note||''}</textarea>
+        ${item.detail ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细内容">${item.detail}</textarea>` : ''}
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="心得感悟">${item.feeling}</textarea>` : ''}`;
+        internshipList.appendChild(div);
       });
     }
   }
 
-  // 恢复打卡同步的竞赛经历
-  if (f.competitions && f.competitions.length) {
-    const list = document.getElementById('competitionList');
-    if (list) {
-      list.querySelectorAll('.exp-item[data-from-checkin]').forEach(el => el.remove());
-      f.competitions.forEach(item => {
+  // 恢复竞赛经历（包含完整字段）
+  const competitionList = document.getElementById('competitionList');
+  if (competitionList) {
+    // 先清除所有已有项（包括默认空框），再恢复
+    competitionList.innerHTML = '';
+    // 过滤掉已保存的全空条目
+    const validItems = data.competitions.filter(item => item.name || item.compname || item.award || item.note);
+    if (validItems.length) {
+      data.competitions.forEach(item => {
         const div = document.createElement('div');
         div.className = 'exp-item fade-in';
         div.setAttribute('data-from-checkin', '1');
         div.innerHTML = `<div class="exp-header">
-          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.compname||''}" type="text">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.name||item.compname||''}" type="text">
           <button class="exp-remove" onclick="removeExp(this)">×</button>
         </div>
         <div style="display:flex;gap:7px;margin-top:6px;">
           <input class="form-input" style="flex:1;" value="${item.award||''}" placeholder="获奖等级" type="text">
-        </div>`;
-        list.appendChild(div);
+        </div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细描述">${item.note||''}</textarea>
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="参赛感想">${item.feeling}</textarea>` : ''}`;
+        competitionList.appendChild(div);
+      });
+    }
+  }
+
+  // 恢复学术成果（包含完整字段）
+  const publicationList = document.getElementById('publicationList');
+  if (publicationList) {
+    // 先清除所有已有项（包括默认空框），再恢复
+    publicationList.innerHTML = '';
+    // 过滤掉已保存的全空条目
+    const validItems = data.publications.filter(item => item.title || item.pubname || item.note);
+    if (validItems.length) {
+      data.publications.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'exp-item fade-in';
+        div.setAttribute('data-from-checkin', '1');
+        div.innerHTML = `<div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.title||item.pubname||''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:6px;">
+          <select class="form-select" style="flex:1;">
+            <option value="">请选择</option>
+            <option ${item.type==='期刊论文'?'selected':''}>期刊论文</option>
+            <option ${item.type==='会议论文'?'selected':''}>会议论文</option>
+            <option ${item.type==='专利'?'selected':''}>专利</option>
+            <option ${item.type==='软件著作权'?'selected':''}>软件著作权</option>
+            <option ${item.type==='其他'?'selected':''}>其他</option>
+          </select>
+        </div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细描述">${item.note||''}</textarea>
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="心得感悟">${item.feeling}</textarea>` : ''}`;
+        publicationList.appendChild(div);
       });
     }
   }
 
   // 恢复证书条目
-  if (f.certs && f.certs.length) {
+  if (data.certs && data.certs.length) {
     const certList = document.getElementById('certList');
     if (certList) {
-      // 清空默认的空白条目
       certList.querySelectorAll('.exp-item').forEach(el => el.remove());
-      f.certs.forEach(item => { addCertEntry(item); });
+      data.certs.forEach(item => { addCertEntry(item); });
     }
   }
 }
@@ -4355,8 +4698,8 @@ function replanFresh() {
   // 重置选择和表单，但保留金币和成就
   state.sel = { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[], cert:[] };
   state.mbti = { answers:{}, result:null, q:0 };
-  state.form = {};
-  state.checkedNodes = {};
+  // 清空统一数据管理器
+  ResumeDataManager.clear();
   document.querySelectorAll('.tag-item.selected').forEach(el=>el.classList.remove('selected'));
   ['userAge','userMajor','userGPA','userSchool','otherAchieve'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
@@ -4395,23 +4738,50 @@ const levelMap = {bachelor:'本科',master:'硕士',phd:'博士'};
 const schoolLevelMap = {985:'985高校',211:'211高校',double_first:'双一流高校',regular:'普通本科',
   junior_college:'专科/高职院校',overseas_top:'海外名校(QS前100)',overseas:'海外普通高校'};
 
-// 收集实习/竞赛/学术数据
+// 收集实习/竞赛/学术数据（完整字段）
 function collectExperienceData() {
   const internships=[], competitions=[], publications=[];
   document.querySelectorAll('#internshipList .exp-item').forEach(item=>{
     const inputs = item.querySelectorAll('input');
-    internships.push({
-      company: inputs[0]?.value||'', role: inputs[1]?.value||'',
-      start: inputs[2]?.value||'', end: inputs[3]?.value||'', desc: inputs[4]?.value||''
-    });
+    const textareas = item.querySelectorAll('textarea');
+    const data = {
+      company: inputs[0]?.value||'',
+      role: inputs[1]?.value||'',
+      start: inputs[2]?.value||'',
+      end: inputs[3]?.value||'',
+      note: inputs[4]?.value||textareas[0]?.value||'',
+      detail: textareas[1]?.value||'',
+      feeling: textareas[2]?.value||''
+    };
+    // 跳过全空的条目
+    if (data.company || data.role || data.note) internships.push(data);
   });
   document.querySelectorAll('#competitionList .exp-item').forEach(item=>{
     const inputs = item.querySelectorAll('input');
-    competitions.push({name: inputs[0]?.value||'', award: inputs[1]?.value||'', year: inputs[2]?.value||''});
+    const textareas = item.querySelectorAll('textarea');
+    const data = {
+      name: inputs[0]?.value||'',
+      award: inputs[1]?.value||'',
+      year: inputs[2]?.value||'',
+      note: textareas[0]?.value||'',
+      feeling: textareas[1]?.value||''
+    };
+    // 跳过全空的条目
+    if (data.name || data.award || data.note) competitions.push(data);
   });
   document.querySelectorAll('#publicationList .exp-item').forEach(item=>{
     const inputs = item.querySelectorAll('input');
-    publications.push({title: inputs[0]?.value||'', type: item.querySelector('select')?.value||'', year: inputs[1]?.value||''});
+    const select = item.querySelector('select');
+    const textareas = item.querySelectorAll('textarea');
+    const data = {
+      title: inputs[0]?.value||'',
+      type: select?.value||'',
+      year: inputs[1]?.value||'',
+      note: textareas[0]?.value||'',
+      feeling: textareas[1]?.value||''
+    };
+    // 跳过全空的条目
+    if (data.title || data.type || data.note) publications.push(data);
   });
   return {internships, competitions, publications};
 }
@@ -4423,7 +4793,7 @@ async function testApiKey() {
 
 // 调用 AI API
 async function askDeepSeek(systemPrompt, userMessage) {
-  // 通过后端代理调用 AI（服务端统一管理 API Key）
+  // 通过后端代理调用 AI（非流式，直接返回完整 JSON）
   const resp = await fetch(API_BASE + '/api/ai/generate', {
     method:'POST',
     headers:{
@@ -4435,43 +4805,14 @@ async function askDeepSeek(systemPrompt, userMessage) {
       user_message: userMessage
     })
   });
-  if (!resp.ok) {
-    const err = await resp.json().catch(()=>({}));
-    throw new Error(err.msg || err.error || `API 返回 ${resp.status}`);
+  const data = await resp.json();
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.msg || data.error || `API 返回 ${resp.status}`);
   }
-
-  // 读取流式响应
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let fullContent = '';
-  let buffer = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('data: ')) {
-        const dataStr = trimmed.slice(6);
-        if (dataStr === '[DONE]') break;
-        try {
-          const j = JSON.parse(dataStr);
-          if (j.error) throw new Error(j.error);
-          if (j.content) fullContent += j.content;
-        } catch(e) {
-          if (e.message && !e.message.includes('JSON')) throw e;
-        }
-      }
-    }
-  }
-
-  // 提取JSON（可能被```json包裹）
+  // 直接解析返回的 JSON 内容
+  const fullContent = data.content || '';
   const jsonMatch = fullContent.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('AI 返回了非 JSON 格式的内容');
+  if (!jsonMatch) throw new Error('AI 返回了非 JSON 格式的内容: ' + fullContent.slice(0, 200));
   return JSON.parse(jsonMatch[0]);
 }
 
@@ -4513,10 +4854,6 @@ function buildAIPrompt() {
   const degreeName = levelMap[f.degree]||f.degree||'未填写';
   const schoolLv = schoolLevelMap[f.schoolLevel]||'未填写';
   // 诊断日志（按 F12 查看）
-  console.log('[buildAIPrompt] labelMap:', JSON.parse(JSON.stringify(labelMap)));
-  console.log('[buildAIPrompt] customTags:', JSON.parse(JSON.stringify(customTags)));
-  console.log('[buildAIPrompt] sel:', JSON.parse(JSON.stringify(state.sel)));
-  console.log('[buildAIPrompt] prefInfo:', `行业:${indNames.join('、')} | 岗位:${jobNames.join('、')}`);
 
   const userInfo = `年龄:${f.age||'未填写'} | 专业:${f.major||'未填写'} | 学历:${degreeName} | 年级:${glabel(f.grade)} | 学校:${f.school||'未填写'}(${schoolLv}) | 预计毕业:${f.gradYear||'未知'}年 | GPA:${f.gpa||'未填写'}`;
   const prefInfo = `意向行业:${indNames.join('、')||'未选择'} | 岗位类型:${jobNames.join('、')||'未选择'} | 公司类型:${compNames.join('、')||'未选择'} | 期望城市:${cityNames.join('、')||'未选择'} | 五年目标:${goalNames.join('、')||'未选择'} | 英语:${engNames.join('、')||'无'} | 技能:${skillNames.join('、')||'无'} | MBTI:${mbtiType}`;
@@ -4541,7 +4878,7 @@ function buildAIPrompt() {
     {"name":"公司名称","logo":"一个最能代表该公司的emoji","desc":"该公司简介和推荐理由(30-50字)","tag":"推荐标签(如:大厂实习/央企秋招/投行暑期)"}
   ],
   "milestones": [
-    {"id":"n0","icon":"emoji","color":"#hex颜色","label":"简短标题(4-6字)","time":"时间范围","desc":"该阶段具体任务描述(30-50字)","checkinType":"text或internship或competition","checkinLabel":"打卡提示文字","done":false}
+    {"id":"n0","icon":"只选一个最能代表该里程碑核心内容的emoji，如：备考用📚/✍️，实习用💼，竞赛用🏅，技能用💻，证书用📜，论文用📄，面试用🎤，毕业用🎓，通用用🎯","color":"#hex颜色","label":"简短标题(4-6字)","time":"时间范围","desc":"该阶段具体任务描述(30-50字)","checkinType":"text或internship或competition","checkinLabel":"打卡提示文字","done":false}
   ]
 }
 
@@ -4636,6 +4973,10 @@ async function generatePlan() {
     }
 
     // 用AI返回的milestones渲染路线图
+    // 重新生成规划时，重置所有打卡记录和宝箱数据
+    state.checkedNodes = {};
+    state.treasureOpenedFor = {};
+
     if (result.milestones && result.milestones.length) {
       state.milestones = result.milestones.map(m=>({
         id: m.id||('n'+Math.random().toString(36).substr(2,4)),
@@ -4676,6 +5017,10 @@ async function generatePlan() {
       <div class="advice-icon">${a.icon}</div>
       <div class="advice-content"><strong>${a.title}</strong><p>${a.text}</p></div>
     </div>`).join('');
+
+  // 重新生成规划时，重置所有打卡记录和宝箱数据
+  state.checkedNodes = {};
+  state.treasureOpenedFor = {};
 
   state.milestones = genMilestones(grade, gradYear, industry, company);
   renderHRoadmap();
@@ -4756,14 +5101,20 @@ function renderHRoadmap() {
     const nodeStyle = isDone
       ? `background:linear-gradient(135deg,#ffd700,#ff9900);`
       : `background:linear-gradient(135deg,${m.color},${m.color}99);`;
+    const treasure = state.treasureOpenedFor[m.id];
+    const isOpened = treasure && treasure.opened;
+    const hasStoredFeedback = treasure && treasure.feedback;
+    const hasUnopenedTreasure = isDone && !isOpened;
     html += `
       <div class="rm-node ${isDone?'done':''}" id="rn-${m.id}" data-idx="${i}" onclick="clickNode(${i})">
         <div class="rm-node-inner" style="${nodeStyle}" title="${m.label}">
-          ${isDone?'🪙':m.icon}
+          ${isDone?'⭐':m.icon}
           ${isDone?`<span class="rm-flag">🚩</span>`:''}
         </div>
         <div class="rm-node-label">${m.label}</div>
         <div class="rm-node-time">${m.time}</div>
+        ${hasUnopenedTreasure?`<div class="rm-treasure-hint" onclick="event.stopPropagation();openTreasureForMilestone('${m.id}')">🎁 您有一个宝箱待开启</div>`:''}
+        ${hasStoredFeedback?`<div class="rm-diamond-hint" onclick="event.stopPropagation();showStoredFeedback('${m.id}')" title="查看历史点评">💎</div>`:''}
       </div>
     `;
     if (i < state.milestones.length - 1) {
@@ -4837,13 +5188,37 @@ function clickNode(idx) {
         <input class="form-input" id="ci_compname" placeholder="竞赛名称" value="${existing.compname||''}"></div>
       <div class="form-group"><div class="form-label">🥇 获奖情况</div>
         <input class="form-input" id="ci_award" placeholder="如：国家级二等奖" value="${existing.award||''}"></div>
-      <div class="form-group"><div class="form-label">💬 感想</div>
-        <textarea class="form-input" id="ci_note" rows="2" style="resize:none;" placeholder="参赛感想...">${existing.note||''}</textarea></div>
+      <div class="form-group"><div class="form-label">📝 详细描述</div>
+        <textarea class="form-input" id="ci_note" rows="3" style="resize:none;" placeholder="项目背景、个人职责、使用技术、成果亮点等...">${existing.note||''}</textarea></div>
+      <div class="form-group"><div class="form-label">💬 参赛感想</div>
+        <textarea class="form-input" id="ci_feeling" rows="2" style="resize:none;" placeholder="参赛心得、收获等...">${existing.feeling||''}</textarea></div>
+    `;
+  } else if (m.checkinType === 'publication') {
+    bodyHtml = `
+      <div class="form-group"><div class="form-label">📄 成果名称</div>
+        <input class="form-input" id="ci_pubname" placeholder="论文/专利名称" value="${existing.pubname||''}"></div>
+      <div class="form-group"><div class="form-label">📋 成果类型</div>
+        <select class="form-select" id="ci_pubtype">
+          <option value="">请选择</option>
+          <option ${existing.pubtype==='期刊论文'?'selected':''}>期刊论文</option>
+          <option ${existing.pubtype==='会议论文'?'selected':''}>会议论文</option>
+          <option ${existing.pubtype==='专利'?'selected':''}>专利</option>
+          <option ${existing.pubtype==='软件著作权'?'selected':''}>软件著作权</option>
+          <option ${existing.pubtype==='其他'?'selected':''}>其他</option>
+        </select></div>
+      <div class="form-group"><div class="form-label">📝 详细描述</div>
+        <textarea class="form-input" id="ci_note" rows="3" style="resize:none;" placeholder="研究内容、发表期刊/会议、我的贡献等...">${existing.note||''}</textarea></div>
+      <div class="form-group"><div class="form-label">💬 心得感悟</div>
+        <textarea class="form-input" id="ci_feeling" rows="2" style="resize:none;" placeholder="研究/发表心得等...">${existing.feeling||''}</textarea></div>
     `;
   } else {
     bodyHtml = `
       <div class="form-group"><div class="form-label">✍️ ${m.checkinLabel}</div>
-        <textarea class="form-input" id="ci_note" rows="3" style="resize:none;" placeholder="写下你的经历或感想...">${existing.note||''}</textarea></div>
+        <textarea class="form-input" id="ci_note" rows="2" style="resize:none;" placeholder="简要描述...">${existing.note||''}</textarea></div>
+      <div class="form-group"><div class="form-label">📝 详细内容</div>
+        <textarea class="form-input" id="ci_detail" rows="3" style="resize:none;" placeholder="详细记录你的经历、任务、成果等...">${existing.detail||''}</textarea></div>
+      <div class="form-group"><div class="form-label">💬 心得感悟</div>
+        <textarea class="form-input" id="ci_feeling" rows="2" style="resize:none;" placeholder="写下你的感悟或收获...">${existing.feeling||''}</textarea></div>
     `;
   }
   document.getElementById('ciBody').innerHTML = bodyHtml;
@@ -4865,9 +5240,13 @@ function confirmCheckin() {
 
   // 收集额外字段
   const extra = {};
-  ['ci_company','ci_role','ci_compname','ci_award'].forEach(id=>{
+  ['ci_company','ci_role','ci_compname','ci_award','ci_pubname','ci_pubtype','ci_detail'].forEach(id=>{
     const el=document.getElementById(id); if(el) extra[id.replace('ci_','')]=el.value;
   });
+  // 收集心得感悟
+  const feelingEl = document.getElementById('ci_feeling');
+  if (feelingEl) extra.feeling = feelingEl.value.trim();
+  
   const wasNew = !state.checkedNodes[m.id];
   state.checkedNodes[m.id] = { note, ...extra, time: new Date().toLocaleString('zh-CN') };
   m.done = true;
@@ -4879,13 +5258,27 @@ function confirmCheckin() {
     addAchievement(m.icon, `路标打卡：${m.label}`);
     showToast(`🪙 打卡成功！${m.label} +10金币！`, 2500);
     // 同步简历
-    syncCheckinToResume(m, extra, note);
+    syncCheckinToResume(m, extra, note, extra.feeling);
     // 保存打卡记录到服务端
     savePlanToServer(null).then(() => {
-      console.log('✅ 打卡记录已同步到服务端');
+      // 同步成功
     }).catch(e => {
       console.warn('⚠️ 打卡记录同步失败:', e);
     });
+    
+    // ===== 保存百宝箱数据（不自动开启），保留已有的反馈内容 =====
+    const existing = state.treasureOpenedFor[m.id] || {};
+    const wasAlreadyOpened = existing.opened;
+    state.treasureOpenedFor[m.id] = {
+      opened: false,
+      milestone: m,
+      extra,
+      note,
+      feedback: existing.feedback || null // 保留历史反馈
+    };
+    if (!wasAlreadyOpened) {
+      showToast('🎁 您有一个宝箱待开启，点击下方提示开启！', 3000);
+    }
   } else {
     showToast('✅ 记录已更新！');
     // 更新打卡记录到服务端
@@ -4897,46 +5290,522 @@ function confirmCheckin() {
   moveRunnerTo(currentNodeIdx + 1);
 }
 
-// 将打卡内容同步到简历信息（同时更新 state.form 确保持久化）
-function syncCheckinToResume(m, extra, note) {
-  if (m.checkinType === 'internship' && extra.company) {
-    // 更新 state.form（用于服务端持久化）
-    if (!state.form.internships) state.form.internships = [];
-    state.form.internships.push({ company: extra.company||'', role: extra.role||'', note });
+// ============================================================
+//  ===== 百宝箱动画和AI反馈 =====
+// ============================================================
 
-    // 更新 DOM（如果简历页面已渲染）
-    const list = document.getElementById('internshipList');
-    if (list) {
+let currentCheckinData = null;  // 存储当前打卡数据
+let currentFeedback = '';       // 存储AI反馈
+let adjustedMilestones = null;   // 存储调整后的路标
+
+function showTreasureBox(milestone, extra, note) {
+  currentCheckinData = { milestone, extra, note };
+  
+  // 重置状态
+  document.getElementById('treasureModal').classList.remove('opened');
+  document.getElementById('chestGlow').style.opacity = '0';
+  document.getElementById('treasureBtn').style.display = 'block';
+  document.getElementById('treasureBtnText').textContent = '🎁 点击开启百宝箱';
+  document.getElementById('tmTitle').textContent = '准备开启...';
+  document.getElementById('tmContent').textContent = '完成打卡后，点击开启获得专属反馈！';
+  document.getElementById('treasureMessage').classList.remove('has-scroll');
+  
+  // 显示弹窗
+  document.getElementById('treasureModal').classList.add('show');
+}
+
+// 根据路标ID开启宝箱
+function openTreasureForMilestone(milestoneId) {
+  const treasureData = state.treasureOpenedFor[milestoneId];
+  const m = state.milestones.find(m => m.id === milestoneId);
+  const checkinData = state.checkedNodes[milestoneId];
+  
+  if (!m || !checkinData) return;
+  
+  // 如果已有 treasureOpenedFor 记录，直接用它
+  if (treasureData && treasureData.milestone) {
+    showTreasureBox(treasureData.milestone, treasureData.extra, treasureData.note);
+    return;
+  }
+  
+  // 兼容旧数据：没有记录时，从 checkedNodes 重建数据
+  const extra = {};
+  ['company','role','compname','award','pubname','pubtype','detail','feeling'].forEach(key => {
+    if (checkinData[key]) extra[key] = checkinData[key];
+  });
+  const note = checkinData.note || '';
+  
+  // 保存到 treasureOpenedFor
+  state.treasureOpenedFor[milestoneId] = { opened: false, milestone: m, extra, note };
+  
+  // 显示宝箱
+  showTreasureBox(m, extra, note);
+}
+
+// 关闭百宝箱
+function closeTreasureBox() {
+  document.getElementById('treasureModal').classList.remove('show');
+  // 恢复宝箱和按钮的显示（用于下次正常开启）
+  document.getElementById('treasureChest').style.display = 'block';
+  document.getElementById('treasureBtn').style.display = 'block';
+}
+
+function openTreasureChest() {
+  const modal = document.getElementById('treasureModal');
+  const btn = document.getElementById('treasureBtn');
+  const btnText = document.getElementById('treasureBtnText');
+  
+  // 禁用按钮
+  btn.disabled = true;
+  btnText.textContent = '✨ 开启中...';
+  
+  // 标记为已点击开启（即使API失败也不重复提示）
+  if (currentCheckinData && currentCheckinData.milestone) {
+    const mid = currentCheckinData.milestone.id;
+    if (state.treasureOpenedFor[mid]) {
+      state.treasureOpenedFor[mid].opened = true;
+      renderHRoadmap(); // 立即隐藏提示
+    }
+  }
+  
+  // 播放开启动画
+  modal.classList.add('opened');
+  
+  // 生成粒子效果
+  createParticles();
+  
+  // 更新消息
+  document.getElementById('tmTitle').textContent = '🎉 恭喜你！';
+  document.getElementById('tmContent').innerHTML = '<div class="tm-dots"><span></span><span></span><span></span></div>正在生成专属反馈...';
+  document.getElementById('treasureMessage').classList.remove('has-scroll');
+  
+  // 调用AI生成反馈
+  generateCheckinFeedback();
+}
+
+// 创建粒子效果
+function createParticles() {
+  const container = document.getElementById('treasureParticles');
+  const emojis = ['💎', '⭐', '✨', '💫', '🌟', '💛', '🎊'];
+  
+  for (let i = 0; i < 12; i++) {
+    const particle = document.createElement('span');
+    particle.className = 'particle';
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    
+    // 随机位置和动画方向
+    const angle = (Math.random() * 360) * (Math.PI / 180);
+    const distance = 80 + Math.random() * 60;
+    const px = Math.cos(angle) * distance;
+    const py = Math.sin(angle) * distance - 50;
+    
+    particle.style.cssText = `
+      left: 50%;
+      top: 40%;
+      --px: ${px}px;
+      --py: ${py}px;
+      animation-delay: ${Math.random() * 0.3}s;
+    `;
+    
+    container.appendChild(particle);
+    
+    // 动画结束后移除
+    setTimeout(() => particle.remove(), 1500);
+  }
+}
+
+// 调用AI生成反馈
+async function generateCheckinFeedback() {
+  try {
+    // 准备用户数据
+    const userProfile = {
+      grade: state.form?.grade || '',
+      major: state.form?.major || '',
+      school: state.form?.school || '',
+      industry: state.form?.industry?.join(',') || '',
+      targetPosition: state.form?.targetPosition || '',
+      targetCompany: state.form?.targetCompany || '',
+      gradYear: state.form?.gradYear || ''
+    };
+    
+    // 准备请求数据
+    const requestData = {
+      user_profile: userProfile,
+      checked_nodes: state.checkedNodes,
+      current_checkin: {
+        ...currentCheckinData.milestone,
+        note: currentCheckinData.note,
+        extra: currentCheckinData.extra
+      },
+      milestones: state.milestones,
+      ai_plan: state.aiPlan || {}
+    };
+    
+    // 调用后端API
+    const res = await api('/api/ai/checkin-feedback', {
+      method: 'POST',
+      body: JSON.stringify(requestData)
+    });
+    
+    if (res.ok && res.feedback) {
+      currentFeedback = res.feedback;
+      
+      // 标记宝箱已开启，并保存反馈内容
+      if (currentCheckinData && currentCheckinData.milestone) {
+        const mid = currentCheckinData.milestone.id;
+        if (state.treasureOpenedFor[mid]) {
+          state.treasureOpenedFor[mid].opened = true;
+          state.treasureOpenedFor[mid].feedback = res.feedback; // 保存反馈
+          renderHRoadmap(); // 重新渲染路线图，让💎钻石立即显示
+        }
+      }
+      
+      // 显示反馈内容
+      document.getElementById('tmTitle').textContent = '🦉 获得专属点评！';
+      document.getElementById('treasureMessage').classList.add('has-scroll');
+      document.getElementById('tmContent').innerHTML = `
+        <p style="margin:15px 0;text-align:left;background:rgba(255,255,255,0.1);padding:12px;border-radius:10px;">
+          ${currentFeedback.replace(/\n/g, '<br>')}
+        </p>
+        <div style="margin-top:15px;">
+          <button class="btn-primary" onclick="showFeedbackModal()" style="padding:10px 20px;font-size:14px;">
+            📜 查看详细反馈
+          </button>
+        </div>
+      `;
+      
+      // 添加钻石奖励
+      setTimeout(() => {
+        addTreasureReward();
+      }, 500);
+      
+      // 同时请求路标调整（异步，不阻塞反馈显示）
+      requestMilestoneAdjustment(requestData);
+      
+    } else {
+      // 判断是否是API Key相关错误
+      const errMsg = res.msg || '';
+      if (errMsg.includes('401') || errMsg.includes('API Key') || errMsg.includes('Authorization') || errMsg.includes('未配置')) {
+        document.getElementById('tmContent').innerHTML = `
+          <p style="color:#ff9500;margin-bottom:10px;">⚠️ AI反馈功能暂不可用</p>
+          <p style="font-size:12px;color:#888;">原因：API Key 未配置或无效</p>
+          <button class="btn-primary" onclick="location.href='#ai-settings'" style="margin-top:12px;padding:8px 16px;font-size:12px;">
+            🔧 去配置 API Key
+          </button>
+        `;
+      } else {
+        document.getElementById('treasureMessage').classList.remove('has-scroll');
+        document.getElementById('tmContent').textContent = '💡 ' + (res.msg || '感谢你的打卡！继续加油！');
+      }
+    }
+    
+  } catch (e) {
+    console.error('生成反馈失败:', e);
+    document.getElementById('tmContent').textContent = '💡 感谢你的打卡！继续加油！';
+  }
+}
+
+// 添加百宝箱奖励
+function addTreasureReward() {
+  // 随机获得3-8颗钻石
+  const diamonds = 3 + Math.floor(Math.random() * 6);
+  addCoins(diamonds);
+  playCoinSfx();
+  showToast(`💎 开启百宝箱获得 ${diamonds} 颗钻石！`, 3000);
+}
+
+// 显示已存储的历史反馈（来自钻石图标点击）
+function showStoredFeedback(milestoneId) {
+  const treasure = state.treasureOpenedFor[milestoneId];
+  if (!treasure || !treasure.feedback) {
+    // 没有存储的反馈，降级到重新开启
+    openTreasureForMilestone(milestoneId);
+    return;
+  }
+  currentFeedback = treasure.feedback;
+  document.getElementById('treasureModal').classList.remove('show');
+
+  // 隐藏宝箱和按钮
+  document.getElementById('treasureChest').style.display = 'none';
+  document.getElementById('treasureBtn').style.display = 'none';
+
+  // 显示历史点评
+  document.getElementById('tmTitle').textContent = '🦉 历史点评';
+  document.getElementById('treasureMessage').classList.add('has-scroll');
+  document.getElementById('tmContent').innerHTML = `
+    <p style="margin:15px 0;text-align:left;background:rgba(255,255,255,0.1);padding:12px;border-radius:10px;">
+      ${currentFeedback.replace(/\n/g, '<br>')}
+    </p>
+    <div style="margin-top:15px;">
+      <button class="btn-primary" onclick="showFeedbackModal()" style="padding:10px 20px;font-size:14px;">
+        📜 查看详细反馈
+      </button>
+    </div>
+  `;
+  document.getElementById('treasureModal').classList.add('show');
+}
+
+// 显示详细反馈弹窗
+function showFeedbackModal() {
+  // 关闭百宝箱
+  document.getElementById('treasureModal').classList.remove('show');
+  
+  // 设置反馈内容
+  document.getElementById('feedbackContent').innerHTML = `
+    <p style="margin-bottom:15px;">${currentFeedback.replace(/\n/g, '</p><p style="margin-bottom:15px;">')}</p>
+  `;
+  
+  // 显示反馈弹窗
+  document.getElementById('feedbackModal').classList.add('show');
+}
+
+function closeFeedback() {
+  document.getElementById('feedbackModal').classList.remove('show');
+  
+  // 检查是否需要显示路标调整
+  if (adjustedMilestones) {
+    showMilestoneAdjustModal();
+  }
+}
+
+// 请求路标调整
+async function requestMilestoneAdjustment(requestData) {
+  try {
+    const res = await api('/api/ai/adjust-milestones', {
+      method: 'POST',
+      body: JSON.stringify(requestData)
+    });
+    
+    if (res.ok && res.adjusted) {
+      adjustedMilestones = res;
+    }
+  } catch (e) {
+    console.error('路标调整失败:', e);
+  }
+}
+
+// 显示路标调整弹窗
+function showMilestoneAdjustModal() {
+  const content = document.getElementById('adjustContent');
+  const reason = document.getElementById('acReason');
+  
+  reason.textContent = adjustedMilestones.reason || '根据你的最新进展进行了优化';
+  
+  // 获取已完成的路标数量（从响应中获取，或从当前状态计算）
+  const completedCount = adjustedMilestones.completed_count ?? 
+    (state.milestones.filter(m => state.checkedNodes[m.id]).length);
+  
+  // 获取已完成的路标（这些不会被调整）
+  const completedMilestones = state.milestones.filter(m => state.checkedNodes[m.id]);
+  
+  // 显示已完成的路标（明确告知用户这些不会变）
+  let html = '<div style="margin-bottom:12px;">';
+  if (completedMilestones.length > 0) {
+    html += '<p style="font-size:12px;color:#888;margin-bottom:6px;">已完成的路标（保持不变）：</p>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">';
+    completedMilestones.forEach(m => {
+      html += `<span style="background:#e8f5e9;color:#2e7d32;padding:3px 8px;border-radius:12px;font-size:11px;">
+        ✅ ${m.icon || '📍'} ${m.label}
+      </span>`;
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  
+  // 显示调整后的剩余路标预览
+  const newRemaining = adjustedMilestones.milestones?.slice(completedCount) || [];
+  if (newRemaining.length > 0) {
+    html += '<p style="font-weight:600;margin-bottom:8px;">调整后的剩余路标：</p>';
+    html += '<ul style="margin:0;padding-left:20px;font-size:13px;">';
+    newRemaining.slice(0, 3).forEach(m => {
+      html += `<li style="margin:5px 0;color:#555;">${m.icon || '📍'} ${m.label}</li>`;
+    });
+    if (newRemaining.length > 3) {
+      html += `<li style="color:#888;margin:5px 0;">...还有 ${newRemaining.length - 3} 个路标</li>`;
+    }
+    html += '</ul>';
+
+  } else {
+    html += '<p style="color:#888;">🎉 所有路标都已完成！</p>';
+  }
+  
+  content.innerHTML = html;
+  document.getElementById('adjustModal').classList.add('show');
+}
+
+// 应用调整后的路标
+function applyAdjustedMilestones() {
+  if (adjustedMilestones && adjustedMilestones.milestones) {
+    // 获取已完成的路标ID
+    const completedIds = new Set(Object.keys(state.checkedNodes));
+    
+    // 获取响应中的已完成数量
+    const serverCompletedCount = adjustedMilestones.completed_count ?? 0;
+    const localCompletedCount = completedIds.size;
+    
+    // 安全检查：确保服务端返回的已完成数量与本地一致
+    if (serverCompletedCount !== localCompletedCount) {
+      console.error('路标调整安全检查失败：已完成数量不匹配', {
+        server: serverCompletedCount,
+        local: localCompletedCount
+      });
+      showToast('⚠️ 路标调整失败，请刷新页面重试');
+      document.getElementById('adjustModal').classList.remove('show');
+      return;
+    }
+    
+    // 安全检查：从响应中提取已完成的路标
+    const serverCompletedMilestones = adjustedMilestones.milestones.slice(0, serverCompletedCount);
+    
+    // 验证已完成的路标ID与本地一致
+    const serverCompletedIds = new Set(serverCompletedMilestones.map(m => m.id));
+    let allMatch = true;
+    for (const id of completedIds) {
+      if (!serverCompletedIds.has(id)) {
+        allMatch = false;
+        console.error('路标调整安全检查失败：已完成路标ID不匹配', id);
+        break;
+      }
+    }
+    
+    if (!allMatch) {
+      showToast('⚠️ 路标调整失败，已完成的路标信息不匹配，请刷新页面');
+      document.getElementById('adjustModal').classList.remove('show');
+      return;
+    }
+    
+    // 提取剩余的路标（从serverCompletedCount之后的部分）
+    const adjustedRemainingMilestones = adjustedMilestones.milestones.slice(serverCompletedCount);
+    
+    // 合并：保持原有的已完成路标 + 调整后的剩余路标
+    state.milestones = [...serverCompletedMilestones, ...adjustedRemainingMilestones];
+    
+    // 确保已完成路标的打卡状态也被保留
+    serverCompletedMilestones.forEach(m => {
+      if (!state.checkedNodes[m.id]) {
+        state.checkedNodes[m.id] = { note: '', time: '' };
+      }
+      m.done = true;
+    });
+    
+    adjustedMilestones = null;
+    
+    // 重新渲染
+    renderHRoadmap();
+    
+    // 保存到服务器
+    savePlanToServer(null);
+    
+    showToast('✨ 路标已更新！');
+  }
+  document.getElementById('adjustModal').classList.remove('show');
+}
+
+// 保留原路标
+function keepOldMilestones() {
+  adjustedMilestones = null;
+  document.getElementById('adjustModal').classList.remove('show');
+  showToast('✅ 原路标保持不变');
+}
+
+// 将打卡内容同步到简历信息（使用统一数据管理器）
+function syncCheckinToResume(m, extra, note, feeling) {
+  // 使用 ResumeDataManager 统一管理
+  ResumeDataManager.loadFromForm(); // 先从 state.form 加载最新数据
+  ResumeDataManager.syncFromCheckin(m, extra, note, feeling); // 同步打卡数据
+
+  // 更新 DOM（如果简历页面已渲染）
+  const internshipList = document.getElementById('internshipList');
+  const competitionList = document.getElementById('competitionList');
+  const publicationList = document.getElementById('publicationList');
+
+  // 获取刚添加的最后一项
+  const data = ResumeDataManager.data;
+
+  // 同步实习经历到 DOM
+  if (m.checkinType === 'internship' && extra.company && internshipList) {
+    // 避免重复：检查是否已存在相同公司名的条目
+    const exists = Array.from(internshipList.querySelectorAll('.exp-item')).some(el =>
+      el.querySelector('.exp-title-input')?.value === extra.company
+    );
+    if (!exists) {
+      const item = data.internships[data.internships.length - 1];
       const div = document.createElement('div');
       div.className = 'exp-item fade-in';
-      div.innerHTML = `<div class="exp-header">
-        <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${extra.company||''}" type="text">
-        <button class="exp-remove" onclick="removeExp(this)">×</button>
-      </div>
-      <input class="form-input" style="margin-top:6px;" value="${extra.role||''}" placeholder="岗位名称" type="text">
-      <input class="form-input" style="margin-top:6px;" value="${note}" placeholder="主要工作内容" type="text">`;
-      list.appendChild(div);
+      div.setAttribute('data-from-checkin', '1');
+      div.innerHTML = `
+        <div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.company || ''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <input class="form-input" style="margin-top:6px;" value="${item.role || ''}" placeholder="岗位名称" type="text">
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="主要工作内容">${item.note || ''}</textarea>
+        ${item.detail ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细内容">${item.detail}</textarea>` : ''}
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="心得感悟">${item.feeling}</textarea>` : ''}
+      `;
+      internshipList.appendChild(div);
       showToast('📋 实习经历已同步到简历！', 2500);
     }
-  } else if (m.checkinType === 'competition' && extra.compname) {
-    // 更新 state.form
-    if (!state.form.competitions) state.form.competitions = [];
-    state.form.competitions.push({ compname: extra.compname||'', award: extra.award||'' });
+  }
 
-    // 更新 DOM
-    const list = document.getElementById('competitionList');
-    if (list) {
+  // 同步竞赛经历到 DOM
+  if (m.checkinType === 'competition' && (extra.compname || extra.name) && competitionList) {
+    const name = extra.compname || extra.name || '';
+    const exists = Array.from(competitionList.querySelectorAll('.exp-item')).some(el =>
+      el.querySelector('.exp-title-input')?.value === name
+    );
+    if (!exists) {
+      const item = data.competitions[data.competitions.length - 1];
       const div = document.createElement('div');
       div.className = 'exp-item fade-in';
-      div.innerHTML = `<div class="exp-header">
-        <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${extra.compname||''}" type="text">
-        <button class="exp-remove" onclick="removeExp(this)">×</button>
-      </div>
-      <div style="display:flex;gap:7px;margin-top:6px;">
-        <input class="form-input" style="flex:1;" value="${extra.award||''}" placeholder="获奖等级" type="text">
-      </div>`;
-      list.appendChild(div);
+      div.setAttribute('data-from-checkin', '1');
+      div.innerHTML = `
+        <div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.name || ''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:6px;">
+          <input class="form-input" style="flex:1;" value="${item.award || ''}" placeholder="获奖等级" type="text">
+        </div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细描述">${item.note || ''}</textarea>
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="参赛感想">${item.feeling}</textarea>` : ''}
+      `;
+      competitionList.appendChild(div);
       showToast('🏆 竞赛经历已同步到简历！', 2500);
+    }
+  }
+
+  // 同步学术成果到 DOM
+  if (m.checkinType === 'publication' && (extra.pubname || extra.title) && publicationList) {
+    const title = extra.pubname || extra.title || '';
+    const exists = Array.from(publicationList.querySelectorAll('.exp-item')).some(el =>
+      el.querySelector('.exp-title-input')?.value === title
+    );
+    if (!exists) {
+      const item = data.publications[data.publications.length - 1];
+      const div = document.createElement('div');
+      div.className = 'exp-item fade-in';
+      div.setAttribute('data-from-checkin', '1');
+      div.innerHTML = `
+        <div class="exp-header">
+          <input class="form-input exp-title-input" style="margin:0;font-weight:700;" value="${item.title || ''}" type="text">
+          <button class="exp-remove" onclick="removeExp(this)">×</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:6px;">
+          <select class="form-select" style="flex:1;">
+            <option value="">请选择</option>
+            <option ${item.type === '期刊论文' ? 'selected' : ''}>期刊论文</option>
+            <option ${item.type === '会议论文' ? 'selected' : ''}>会议论文</option>
+            <option ${item.type === '专利' ? 'selected' : ''}>专利</option>
+            <option ${item.type === '软件著作权' ? 'selected' : ''}>软件著作权</option>
+            <option ${item.type === '其他' ? 'selected' : ''}>其他</option>
+          </select>
+        </div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="详细描述">${item.note || ''}</textarea>
+        ${item.feeling ? `<textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="心得感悟">${item.feeling}</textarea>` : ''}
+      `;
+      publicationList.appendChild(div);
+      showToast('📚 学术成果已同步到简历！', 2500);
     }
   }
 }
@@ -4957,7 +5826,7 @@ function showToast(msg, dur=2200) {
 //  ===== 小恐龙闯关游戏 (等待时消遣) =====
 // ============================================================
 let dinoGame = {
-  running: false, over: false, score: 0, animId: null,
+  running: false, over: false, score: 0, combo: 0, maxCombo: 0, animId: null,
   dino: null, obstacles: [], frame: 0, speed: 3, W: 0, H: 0, ctx: null, canvas: null
 };
 
@@ -4969,7 +5838,12 @@ function dinoDrawGround() {
 
 function dinoDrawDino() {
   const g = dinoGame, d = g.dino;
-  g.ctx.fillStyle = '#555';
+  // 连击时变色效果
+  if (g.combo >= 3) {
+    g.ctx.fillStyle = g.combo >= 10 ? '#ff4444' : (g.combo >= 5 ? '#ff9944' : '#44aa44');
+  } else {
+    g.ctx.fillStyle = '#555';
+  }
   g.ctx.fillRect(d.x, d.y, d.w, d.h);
   g.ctx.fillStyle = '#444';
   g.ctx.fillRect(d.x+18, d.y-10, 16, 18);
@@ -4983,7 +5857,11 @@ function dinoDrawDino() {
 
 function dinoDrawObstacle(ob) {
   const g = dinoGame;
+  // 连击时障碍物颜色变化
   g.ctx.fillStyle = '#2d7d3a';
+  if (g.combo >= 5) {
+    g.ctx.fillStyle = g.combo >= 10 ? '#aa2222' : '#cc6622';
+  }
   g.ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
   g.ctx.fillRect(ob.x-5, ob.y+5, 6, 12);
   g.ctx.fillRect(ob.x+ob.w-1, ob.y+8, 6, 10);
@@ -5006,12 +5884,14 @@ function dinoLoop() {
   if (g.dino.y >= g.H-40) { g.dino.y = g.H-40; g.dino.vy = 0; g.dino.onGround = true; }
   dinoDrawDino();
 
-  // 生成障碍物（提高出现频率，让游戏更刺激）
-  if (g.frame % Math.max(45, 85-g.speed*5) === 0) {
+  // 生成障碍物（提高出现频率，更快达到连击）
+  const spawnInterval = Math.max(35, 55 - g.speed * 3);  // 更短的间隔
+  if (g.frame % spawnInterval === 0) {
     g.obstacles.push({ x: g.W+10, y: g.H-55, w: 14, h: 36 });
   }
 
-  // 更新障碍物 + 碰撞检测
+  // 更新障碍物 + 碰撞检测 + 连击逻辑
+  let passedThisFrame = false;
   g.obstacles = g.obstacles.filter(ob => {
     ob.x -= g.speed;
     dinoDrawObstacle(ob);
@@ -5026,21 +5906,41 @@ function dinoLoop() {
       g.ctx.textAlign = 'center';
       g.ctx.fillText('游戏结束！', g.W/2, g.H/2-10);
       g.ctx.font = '13px sans-serif';
-      g.ctx.fillText('点击或按空格重来', g.W/2, g.H/2+15);
+      g.ctx.fillText('最高连击: ' + g.maxCombo + ' | 点击或按空格重来', g.W/2, g.H/2+15);
       return false;
+    }
+    // 障碍物通过后的连击计数
+    if (!ob.passed && ob.x + ob.w < d.x) {
+      ob.passed = true;
+      passedThisFrame = true;
     }
     return ob.x > -30;
   });
 
-  // 分数
-  if (!g.over) {
-    g.score = Math.floor(g.frame / 6);
-    g.speed = Math.min(8, 3 + g.score / 200);
+  // 更新连击数
+  if (passedThisFrame && !g.over) {
+    g.combo++;
+    if (g.combo > g.maxCombo) g.maxCombo = g.combo;
   }
+
+  // 分数（基于帧数和连击加成）
+  if (!g.over) {
+    g.score = Math.floor(g.frame / 6) + g.combo * 2;
+    g.speed = Math.min(12, 4 + g.score / 100);  // 更快达到高速
+  }
+
+  // 显示分数和连击
   g.ctx.fillStyle = '#888';
   g.ctx.font = '12px monospace';
   g.ctx.textAlign = 'right';
   g.ctx.fillText('🏆 ' + g.score, g.W-10, 20);
+  // 连击显示
+  if (g.combo >= 2) {
+    g.ctx.fillStyle = g.combo >= 10 ? '#ff4444' : (g.combo >= 5 ? '#ff9944' : '#6366f1');
+    g.ctx.font = 'bold 11px monospace';
+    g.ctx.textAlign = 'left';
+    g.ctx.fillText('🔥 连击 x' + g.combo, 10, 20);
+  }
 
   // 云朵
   g.ctx.fillStyle = 'rgba(0,0,0,0.05)';
@@ -5054,7 +5954,7 @@ function dinoLoop() {
   g.frame++;
   if (!g.over) g.animId = requestAnimationFrame(dinoLoop);
   const scoreEl = document.getElementById('dinoScore');
-  if (scoreEl) scoreEl.textContent = '分数: ' + g.score;
+  if (scoreEl) scoreEl.textContent = '分数: ' + g.score + ' | 连击: ' + g.combo;
 }
 
 // ===== 小恐龙闯关游戏 (等待时消遣) =====
@@ -5065,7 +5965,7 @@ function startDinoGame() {
   const W = canvas.width, H = canvas.height;
 
   dinoGame = {
-    running: true, over: false, score: 0, animId: null,
+    running: true, over: false, score: 0, combo: 0, maxCombo: 0, animId: null,
     dino: { x:40, y:H-40, w:28, h:36, vy:0, onGround:true },
     obstacles: [], frame: 0, speed: 3, W, H, ctx, canvas
   };

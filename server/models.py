@@ -355,16 +355,44 @@ def set_active_engine(user_id: int, engine_id: int = None):
 
 
 def get_active_engine(user_id: int) -> dict:
-    """获取用户当前激活的 AI 引擎配置"""
+    """获取用户当前激活的 AI 引擎配置
+    
+    如果引擎系统为空但 user_settings 有 AI 配置，自动迁移到引擎系统
+    """
     settings = get_user_settings(user_id)
-    if not settings or not settings.get('active_engine_id'):
-        return None
-    with get_db() as conn:
-        row = conn.execute(
-            "SELECT * FROM ai_engines WHERE id = ? AND user_id = ?",
-            (settings['active_engine_id'], user_id)
-        ).fetchone()
-        return dict(row) if row else None
+    
+    # 检查引擎系统是否有激活的引擎
+    if settings and settings.get('active_engine_id'):
+        with get_db() as conn:
+            row = conn.execute(
+                "SELECT * FROM ai_engines WHERE id = ? AND user_id = ?",
+                (settings['active_engine_id'], user_id)
+            ).fetchone()
+            if row:
+                return dict(row)
+    
+    # 引擎系统为空，尝试从 user_settings 迁移（兼容旧配置）
+    if settings and settings.get('ai_api_key'):
+        ai_key = settings.get('ai_api_key', '')
+        ai_base_url = settings.get('ai_base_url', '') or 'https://api.deepseek.com'
+        ai_model = settings.get('ai_model', '') or 'deepseek-chat'
+        
+        if ai_key:
+            # 自动创建引擎并设为激活
+            engine_id = add_ai_engine(user_id, '从旧配置迁移', ai_key, ai_base_url, ai_model)
+            set_active_engine(user_id, engine_id)
+            
+            # 返回新创建的引擎
+            with get_db() as conn:
+                row = conn.execute(
+                    "SELECT * FROM ai_engines WHERE id = ? AND user_id = ?",
+                    (engine_id, user_id)
+                ).fetchone()
+                if row:
+                    print(f"[INFO] 已自动迁移 user_settings AI 配置到引擎系统 (engine_id={engine_id})")
+                    return dict(row)
+    
+    return None
 
 
 # ===== AI 引擎管理 =====

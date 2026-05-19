@@ -342,22 +342,26 @@ def ai_generate():
     if not user_message:
         return jsonify({'ok': False, 'msg': '生成内容不能为空'}), 400
 
-    # 确定使用哪个 API Key：优先级：服务端环境变量 > 用户当前激活引擎 > 旧 user_settings 兼容
-    api_key = AI_CONFIG['api_key']
+    # 确定使用哪个 API Key：优先级：用户当前激活引擎 > 服务端环境变量 > 旧 user_settings 兼容
+    api_key = ''
     base_url = AI_CONFIG['base_url']
     model = AI_CONFIG['model']
-    key_source = 'server'
-
-    if not api_key:
-        # 尝试从用户当前激活的 AI 引擎获取
-        engine = get_active_engine(g.user_id)
-        if engine and engine.get('api_key'):
-            api_key = engine['api_key']
-            base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
-            model = engine.get('model', model)
-            key_source = 'user'
+    key_source = ''
+    
+    # 1. 先检查用户当前激活的引擎
+    engine = get_active_engine(g.user_id)
+    if engine and engine.get('api_key'):
+        api_key = engine['api_key']
+        base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
+        model = engine.get('model', model)
+        key_source = 'user'
+    else:
+        # 2. 再检查服务端环境变量
+        api_key = AI_CONFIG['api_key']
+        if api_key:
+            key_source = 'server'
         else:
-            # 兼容旧 user_settings 中的配置
+            # 3. 最后兼容旧 user_settings
             settings = get_user_settings(g.user_id)
             if settings and settings.get('ai_api_key'):
                 api_key = settings['ai_api_key']
@@ -387,7 +391,7 @@ def ai_generate():
             ],
             'temperature': 0.7,
             'max_tokens': 4096,
-            'stream': True  # 流式输出
+            'stream': False
         }).encode('utf-8')
 
         req = urllib.request.Request(
@@ -399,47 +403,18 @@ def ai_generate():
             }
         )
 
-        # 流式返回
+        # 非流式返回（Flask dev server 下流式响应不稳定）
         ctx = ssl.create_default_context()
-
-        def stream_response():
-            try:
-                with urllib.request.urlopen(req, context=ctx, timeout=120) as resp:
-                    buffer = b''
-                    while True:
-                        chunk = resp.read(1)
-                        if not chunk:
-                            break
-                        buffer += chunk
-                        while b'\n' in buffer:
-                            line, buffer = buffer.split(b'\n', 1)
-                            line = line.decode('utf-8').strip()
-                            if line.startswith('data: '):
-                                data_str = line[6:]
-                                if data_str == '[DONE]':
-                                    yield 'data: [DONE]\n\n'
-                                    return
-                                try:
-                                    j = json.loads(data_str)
-                                    delta = j.get('choices', [{}])[0].get('delta', {})
-                                    content = delta.get('content', '')
-                                    if content:
-                                        yield f"data: {json.dumps({'content': content}, ensure_ascii=False)}\n\n"
-                                except json.JSONDecodeError:
-                                    pass
-                yield 'data: [DONE]\n\n'
-            except Exception as e:
-                yield f"data: {json.dumps({'error': str(e)}, ensure_ascii=False)}\n\n"
-
-        from flask import Response
-        return Response(
-            stream_response(),
-            mimetype='text/event-stream',
-            headers={
-                'Cache-Control': 'no-cache',
-                'X-Accel-Buffering': 'no'
-            }
-        )
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        try:
+            with urllib.request.urlopen(req, context=ctx, timeout=120) as resp:
+                result = json.loads(resp.read().decode('utf-8'))
+                content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+                return jsonify({'ok': True, 'content': content, 'model': model})
+        except Exception as e:
+            return jsonify({'ok': False, 'msg': f'AI 生成失败: {str(e)}'}), 500
 
     except Exception as e:
         return jsonify({'ok': False, 'msg': f'AI 生成失败: {str(e)}'}), 500
@@ -448,20 +423,22 @@ def ai_generate():
 @app.route('/api/ai/test', methods=['POST'])
 @login_required
 def ai_test():
-    """测试 AI 连通性（服务端 Key 优先，其次用户当前激活引擎）"""
-    api_key = AI_CONFIG['api_key']
+    """测试 AI 连通性（用户当前激活引擎优先，其次服务端 Key）"""
+    api_key = ''
     base_url = AI_CONFIG['base_url']
     model = AI_CONFIG['model']
 
-    # 如果服务端未配置，尝试用户当前激活引擎
-    if not api_key:
-        engine = get_active_engine(g.user_id)
-        if engine and engine.get('api_key'):
-            api_key = engine['api_key']
-            base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
-            model = engine.get('model', model)
-        else:
-            # 兼容旧 user_settings
+    # 1. 先检查用户当前激活的引擎
+    engine = get_active_engine(g.user_id)
+    if engine and engine.get('api_key'):
+        api_key = engine['api_key']
+        base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
+        model = engine.get('model', model)
+    else:
+        # 2. 再检查服务端环境变量
+        api_key = AI_CONFIG['api_key']
+        if not api_key:
+            # 3. 最后兼容旧 user_settings
             settings = get_user_settings(g.user_id)
             if settings and settings.get('ai_api_key'):
                 api_key = settings['ai_api_key']
@@ -497,6 +474,8 @@ def ai_test():
         )
 
         ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
         with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
             result = json.loads(resp.read().decode('utf-8'))
             return jsonify({
@@ -507,6 +486,472 @@ def ai_test():
             })
     except Exception as e:
         return jsonify({'ok': False, 'msg': f'AI 连接失败: {str(e)}'})
+
+
+@app.route('/api/ai/checkin-feedback', methods=['POST'])
+@login_required
+def ai_checkin_feedback():
+    """生成打卡后的反馈和建议（基于用户当前进展和时间节点）"""
+    data = request.get_json()
+    
+    # 获取用户基本信息
+    user_profile = data.get('user_profile', {})
+    # 获取已打卡记录
+    checked_nodes = data.get('checked_nodes', {})
+    # 获取当前打卡的路标信息
+    current_checkin = data.get('current_checkin', {})
+    # 获取所有路标（包含未完成的）
+    all_milestones = data.get('milestones', [])
+    # 获取AI规划建议
+    ai_plan = data.get('ai_plan', {})
+    
+    # 构建反馈Prompt
+    feedback_prompt = build_checkin_feedback_prompt(
+        user_profile, checked_nodes, current_checkin, all_milestones, ai_plan
+    )
+    
+    # 获取API配置（用户当前激活引擎优先，其次服务端环境变量）
+    api_key = ''
+    base_url = AI_CONFIG['base_url']
+    model = AI_CONFIG['model']
+    
+    # 1. 先检查用户当前激活的引擎
+    engine = get_active_engine(g.user_id)
+    print(f"[DEBUG ai_checkin_feedback] get_active_engine result: {engine}")
+    if engine and engine.get('api_key'):
+        api_key = engine['api_key']
+        base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
+        model = engine.get('model', model)
+    else:
+        # 2. 再检查服务端环境变量
+        api_key = AI_CONFIG['api_key']
+        print(f"[DEBUG ai_checkin_feedback] AI_CONFIG api_key exists: {bool(api_key)}, user_id: {g.user_id}")
+        if not api_key:
+            # 3. 最后兼容旧 user_settings
+            settings = get_user_settings(g.user_id)
+            print(f"[DEBUG ai_checkin_feedback] Fallback to user_settings: {settings}")
+            if settings and settings.get('ai_api_key'):
+                api_key = settings['ai_api_key']
+                if settings.get('ai_base_url'):
+                    base_url = settings['ai_base_url'].rstrip('/')
+                if settings.get('ai_model'):
+                    model = settings['ai_model']
+    
+    if not api_key:
+        print(f"[DEBUG ai_checkin_feedback] No API key found, returning error")
+        return jsonify({'ok': False, 'msg': 'AI API Key 未配置，请在设置中配置你的 API Key'}), 400
+    
+    # 调试日志：显示将要使用的配置
+    masked_key = api_key[:4] + '****' + api_key[-4:] if len(api_key) > 8 else '****'
+    print(f"[DEBUG ai_checkin_feedback] Using API - base_url: {base_url}, model: {model}, key: {masked_key}, user_id: {g.user_id}")
+    
+    base_url = base_url.rstrip('/')
+    
+    try:
+        import urllib.request
+        import ssl
+        
+        api_url = f"{base_url}/chat/completions"
+        payload = json.dumps({
+            'model': model,
+            'messages': [
+                {'role': 'system', 'content': '你是一位温暖、专业、富有洞察力的职业规划导师。你的风格是：\n1. 善于发现用户的亮点和进步，给予真诚的肯定\n2. 结合用户实际情况给出具体可行的建议\n3. 语言亲切自然，像朋友聊天一样\n4. 建议要具体、有针对性，不要泛泛而谈'},
+                {'role': 'user', 'content': feedback_prompt}
+            ],
+            'temperature': 0.8,
+            'max_tokens': 1500
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(
+            api_url,
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f"Bearer {api_key}"
+            }
+        )
+        
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        with urllib.request.urlopen(req, context=ctx, timeout=60) as resp:
+            result = json.loads(resp.read().decode('utf-8'))
+            content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+            
+            return jsonify({
+                'ok': True,
+                'feedback': content,
+                'model': model
+            })
+    
+    except Exception as e:
+        err_str = str(e)
+        print(f"[DEBUG ai_checkin_feedback] API call failed: {err_str}")
+        # 对常见的API错误进行友好提示
+        if '401' in err_str or 'Unauthorized' in err_str or 'Authorization' in err_str:
+            return jsonify({'ok': False, 'msg': 'AI API Key 无效或已过期，请检查你的 API Key 配置'}), 500
+        return jsonify({'ok': False, 'msg': f'生成反馈失败: {err_str}'}), 500
+
+
+def build_checkin_feedback_prompt(user_profile, checked_nodes, current_checkin, all_milestones, ai_plan):
+    """构建打卡反馈的Prompt"""
+    
+    # 用户基本信息
+    grade = user_profile.get('grade', '未知')
+    major = user_profile.get('major', '未知')
+    school = user_profile.get('school', '未知')
+    industry = user_profile.get('industry', '未知')
+    target_position = user_profile.get('targetPosition', '未知')
+    target_company = user_profile.get('targetCompany', '未知')
+    
+    # 整理已完成的经历
+    completed_experiences = []
+    for node_id, info in checked_nodes.items():
+        milestone = next((m for m in all_milestones if m.get('id') == node_id), {})
+        exp = {
+            'label': milestone.get('label', '未知'),
+            'icon': milestone.get('icon', '📌'),
+            'note': info.get('note', ''),
+            'time': info.get('time', ''),
+        }
+        # 根据打卡类型添加额外信息
+        if info.get('company'):
+            exp['company'] = info.get('company')
+        if info.get('role'):
+            exp['role'] = info.get('role')
+        if info.get('award'):
+            exp['award'] = info.get('award')
+        if info.get('pubname'):
+            exp['pubname'] = info.get('pubname')
+        if info.get('feeling'):
+            exp['feeling'] = info.get('feeling')
+        completed_experiences.append(exp)
+    
+    # 当前打卡的路标
+    current_label = current_checkin.get('label', '未知')
+    current_icon = current_checkin.get('icon', '📌')
+    current_note = current_checkin.get('note', '')
+    current_extra = current_checkin.get('extra', {})
+    current_feeling = current_extra.get('feeling', '')
+    
+    # 未完成的路标（按顺序）
+    remaining_milestones = []
+    checked_ids = set(checked_nodes.keys())
+    for m in all_milestones:
+        if m.get('id') not in checked_ids:
+            remaining_milestones.append({
+                'icon': m.get('icon', '📌'),
+                'label': m.get('label', '未知'),
+                'time': m.get('time', ''),
+                'desc': m.get('desc', '')
+            })
+    
+    # 原有AI规划建议
+    ai_advices = ai_plan.get('advices', []) if isinstance(ai_plan, dict) else []
+    
+    # 构建Prompt
+    prompt = f"""## 用户档案
+- 年级：{grade}
+- 专业：{major}
+- 学校：{school}
+- 目标行业：{industry}
+- 目标岗位：{target_position}
+- 目标公司：{target_company}
+
+## 用户已完成的经历（按时间顺序）
+"""
+    
+    for i, exp in enumerate(completed_experiences, 1):
+        prompt += f"\n{i}. {exp['icon']} {exp['label']}"
+        if exp.get('company'):
+            prompt += f"\n   公司：{exp['company']}"
+        if exp.get('role'):
+            prompt += f"\n   岗位：{exp['role']}"
+        if exp.get('award'):
+            prompt += f"\n   获奖：{exp['award']}"
+        if exp.get('pubname'):
+            prompt += f"\n   成果：{exp['pubname']}"
+        if exp.get('note'):
+            prompt += f"\n   记录：{exp['note']}"
+        if exp.get('feeling'):
+            prompt += f"\n   心得：{exp['feeling']}"
+    
+    prompt += f"""
+
+## 刚刚完成的路标
+{current_icon} {current_label}
+记录：{current_note}
+"""
+    if current_extra.get('company'):
+        prompt += f"公司：{current_extra['company']}\n"
+    if current_extra.get('role'):
+        prompt += f"岗位：{current_extra['role']}\n"
+    if current_extra.get('award'):
+        prompt += f"获奖：{current_extra['award']}\n"
+    if current_feeling:
+        prompt += f"心得：{current_feeling}\n"
+    
+    if remaining_milestones:
+        prompt += "\n## 接下来的路标\n"
+        for m in remaining_milestones[:5]:  # 只显示前5个
+            prompt += f"- {m['icon']} {m['label']}（{m['time']}）：{m['desc']}\n"
+    
+    if ai_advices:
+        prompt += "\n## 原有AI规划建议摘要\n"
+        for advice in ai_advices[:3]:  # 只显示前3条
+            if isinstance(advice, dict):
+                prompt += f"- {advice.get('text', str(advice))}\n"
+            else:
+                prompt += f"- {advice}\n"
+    
+    prompt += """
+
+## 任务要求
+请根据以上信息，生成一段温暖的反馈，包含：
+1. **真诚的肯定**：发现用户刚才完成的内容中的亮点，予以肯定
+2. **基于已有成就的鼓励**：结合用户之前完成的经历，说明这一路走来的进步
+3. **下一步具体建议**：结合剩余路标和AI规划，给出1-2个具体可行的下一步行动建议
+4. **适度的激励**：用轻松友好的语气结尾
+
+格式要求：
+- 总字数控制在200-400字
+- 语言亲切自然，像朋友聊天
+- 建议要具体、有针对性，不要泛泛而谈
+- 不要使用emoji（用户界面会统一添加）
+
+请直接输出反馈内容，不要使用JSON或其他格式。"""
+
+    return prompt
+
+
+@app.route('/api/ai/adjust-milestones', methods=['POST'])
+@login_required
+def ai_adjust_milestones():
+    """根据用户已完成的打卡动态调整剩余路标
+    
+    重要原则：
+    - 已完成的路标（包括刚打卡的那个）绝对不能被修改、删除或替换
+    - 只能调整尚未打卡的路标
+    - 不要轻易调整现有的路标，除非对用户未来会有更多帮助
+    """
+    data = request.get_json()
+    
+    # 获取用户基本信息
+    user_profile = data.get('user_profile', {})
+    # 获取已打卡记录
+    checked_nodes = data.get('checked_nodes', {})
+    # 获取原始路标
+    original_milestones = data.get('milestones', [])
+    # 获取AI原始规划
+    ai_plan = data.get('ai_plan', {})
+    
+    # 找出已完成的路标（这些绝对不能修改）
+    completed_milestones = []
+    remaining_milestones = []
+    completed_ids = set()  # 用集合存储已完成的路标ID，便于快速查找
+    checked_ids = set(checked_nodes.keys())
+    
+    for m in original_milestones:
+        if m.get('id') in checked_ids:
+            completed_milestones.append(m)
+            completed_ids.add(m.get('id'))
+        else:
+            remaining_milestones.append(m)
+    
+    # 记录已完成的数量，用于前端验证
+    completed_count = len(completed_milestones)
+    
+    if not remaining_milestones:
+        return jsonify({
+            'ok': True, 
+            'milestones': original_milestones, 
+            'adjusted': False,
+            'completed_count': completed_count
+        })
+    
+    # 构建调整Prompt
+    adjust_prompt = build_milestone_adjust_prompt(
+        user_profile, completed_milestones, remaining_milestones, ai_plan
+    )
+    
+    # 获取API配置（用户当前激活引擎优先，其次服务端环境变量）
+    api_key = ''
+    base_url = AI_CONFIG['base_url']
+    model = AI_CONFIG['model']
+    
+    # 1. 先检查用户当前激活的引擎
+    engine = get_active_engine(g.user_id)
+    if engine and engine.get('api_key'):
+        api_key = engine['api_key']
+        base_url = (engine.get('base_url', base_url) or base_url).rstrip('/')
+        model = engine.get('model', model)
+    else:
+        # 2. 再检查服务端环境变量
+        api_key = AI_CONFIG['api_key']
+        if not api_key:
+            # 3. 最后兼容旧 user_settings
+            settings = get_user_settings(g.user_id)
+            if settings and settings.get('ai_api_key'):
+                api_key = settings['ai_api_key']
+                if settings.get('ai_base_url'):
+                    base_url = settings['ai_base_url'].rstrip('/')
+                if settings.get('ai_model'):
+                    model = settings['ai_model']
+    
+    if not api_key:
+        return jsonify({'ok': False, 'msg': 'AI API Key 未配置，请在设置中配置你的 API Key'}), 400
+    
+    base_url = base_url.rstrip('/')
+    
+    try:
+        import urllib.request
+        import ssl
+        
+        api_url = f"{base_url}/chat/completions"
+        payload = json.dumps({
+            'model': model,
+            'messages': [
+                {'role': 'system', 'content': '你是一位专业的职业规划师，擅长根据用户的实际进展动态调整规划路径。重要原则：只有未完成的路标会被调整，已完成的路标必须保持原样。'},
+                {'role': 'user', 'content': adjust_prompt}
+            ],
+            'temperature': 0.7,
+            'max_tokens': 2000
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(
+            api_url,
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f"Bearer {api_key}"
+            }
+        )
+        
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        with urllib.request.urlopen(req, context=ctx, timeout=60) as resp:
+            result = json.loads(resp.read().decode('utf-8'))
+            content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+            
+            # 解析JSON返回
+            import re
+            json_match = re.search(r'\{[\s\S]*\}', content)
+            if json_match:
+                adjusted = json.loads(json_match.group())
+                adjusted_remaining = adjusted.get('remaining_milestones', remaining_milestones)
+                
+                # 安全检查：确保AI没有返回包含已完成ID的路标
+                # 如果AI返回的路标中有已完成路标的ID，忽略它
+                safe_remaining = []
+                for m in adjusted_remaining:
+                    mid = m.get('id')
+                    # 如果这个路标的ID是已完成ID之一，跳过它（已完成的路标必须保留）
+                    if mid and mid in completed_ids:
+                        continue
+                    # 如果这个路标的label与某个已完成路标完全相同（可能被改头换面），也要检查
+                    is_duplicate = False
+                    for cm in completed_milestones:
+                        if m.get('label') == cm.get('label') and m.get('icon') == cm.get('icon'):
+                            is_duplicate = True
+                            break
+                    if not is_duplicate:
+                        safe_remaining.append(m)
+                
+                # 合并：已完成的路标 + 调整后的剩余路标（经过安全检查）
+                new_milestones = completed_milestones + safe_remaining
+                
+                # 检查是否真的有调整
+                is_actually_adjusted = (len(safe_remaining) != len(remaining_milestones) or
+                                        any(safe_remaining[i].get('label') != remaining_milestones[i].get('label') 
+                                            for i in range(min(len(safe_remaining), len(remaining_milestones)))))
+                
+                return jsonify({
+                    'ok': True,
+                    'milestones': new_milestones,
+                    'adjusted': is_actually_adjusted,
+                    'reason': adjusted.get('reason', ''),
+                    'completed_count': completed_count  # 返回已完成数量，供前端验证
+                })
+            else:
+                return jsonify({
+                    'ok': True, 
+                    'milestones': original_milestones, 
+                    'adjusted': False,
+                    'completed_count': completed_count
+                })
+    
+    except Exception as e:
+        err_str = str(e)
+        # 对常见的API错误进行友好提示
+        if '401' in err_str or 'Unauthorized' in err_str or 'Authorization' in err_str:
+            return jsonify({'ok': False, 'msg': 'AI API Key 无效或已过期，请检查你的 API Key 配置'}), 500
+        return jsonify({'ok': False, 'msg': f'调整路标失败: {err_str}'}), 500
+
+
+def build_milestone_adjust_prompt(user_profile, completed_milestones, remaining_milestones, ai_plan):
+    """构建路标调整的Prompt"""
+    
+    # 用户基本信息
+    grade = user_profile.get('grade', '未知')
+    major = user_profile.get('major', '未知')
+    school = user_profile.get('school', '未知')
+    industry = user_profile.get('industry', '未知')
+    target_position = user_profile.get('targetPosition', '未知')
+    target_company = user_profile.get('targetCompany', '未知')
+    grad_year = user_profile.get('gradYear', '')
+    
+    prompt = f"""## 用户基本信息
+- 年级：{grade}
+- 毕业年份：{grad_year}
+- 专业：{major}
+- 学校：{school}
+- 目标行业：{industry}
+- 目标岗位：{target_position}
+- 目标公司：{target_company}
+
+## 已完成的路标（这些不能修改，保持原样）
+"""
+    
+    for m in completed_milestones:
+        prompt += f"- {m.get('icon', '📌')} {m.get('label', '未知')}（已完成）\n"
+    
+    prompt += "\n## 待调整的剩余路标（可以根据用户实际情况调整）\n"
+    for i, m in enumerate(remaining_milestones, 1):
+        prompt += f"{i}. {m.get('icon', '📌')} {m.get('label', '未知')}（{m.get('time', '')}）\n"
+        prompt += f"   描述：{m.get('desc', '')}\n"
+    
+    prompt += """
+## 调整规则
+1. **已完成的路标必须保留**：不能删除或修改任何已完成的路标
+2. **可以调整的内容**：
+   - 未完成路标的标题、描述、时间节点
+   - 路标的顺序（但要保持逻辑性）
+   - 可以添加新的路标（如果确实需要）
+   - 可以删除明显不合适的路标（需在reason中说明）
+3. **调整原则**：
+   - 根据用户已完成的经历，适当提前或延后相关路标
+   - 如果用户比预期进展快，可以适当增加挑战
+   - 如果用户遇到困难，可以适当降低难度或调整方向
+   - 保持路标之间的逻辑连贯性
+
+## 返回格式
+请返回一个JSON对象，包含：
+{
+  "reason": "调整原因说明（简要）",
+  "remaining_milestones": [
+    {
+      "icon": "emoji图标",
+      "label": "路标标题",
+      "time": "时间描述",
+      "desc": "详细描述"
+    }
+  ]
+}
+
+请直接输出JSON，不要有其他内容。"""
+
+    return prompt
 
 
 # ===== 招聘跳转 API =====
@@ -629,11 +1074,8 @@ def create_ai_engine():
 
     engine_id = add_ai_engine(g.user_id, name, api_key, base_url, model)
 
-    # 如果是第一个引擎，自动设为激活
-    engines = get_ai_engines(g.user_id)
-    settings = get_user_settings(g.user_id)
-    if not settings or not settings.get('active_engine_id'):
-        set_active_engine(g.user_id, engine_id)
+    # 添加引擎后自动设为激活引擎
+    set_active_engine(g.user_id, engine_id)
 
     return jsonify({'ok': True, 'msg': '引擎已添加', 'engine_id': engine_id})
 
@@ -736,6 +1178,8 @@ def test_ai_engine_endpoint(engine_id):
         )
 
         ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
         with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
             body = resp.read().decode('utf-8')
             try:
@@ -743,8 +1187,9 @@ def test_ai_engine_endpoint(engine_id):
             except json.JSONDecodeError:
                 return jsonify({'ok': False, 'msg': f'API 返回了非 JSON 响应，请检查 Base URL 是否正确（当前: {base_url}）。响应前100字符: {body[:100]}'})
 
-            # 测试通过，标记为有效
+            # 测试通过，标记为有效，并自动激活该引擎
             update_ai_engine(engine_id, g.user_id, is_valid=True)
+            set_active_engine(g.user_id, engine_id)
             return jsonify({'ok': True, 'msg': f'连接成功 (模型: {model})', 'model': model})
     except Exception as e:
         update_ai_engine(engine_id, g.user_id, is_valid=False)
