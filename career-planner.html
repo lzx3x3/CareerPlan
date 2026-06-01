@@ -317,6 +317,10 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
 .ai-company-item .ci-desc{font-size:11px;color:#888;margin-top:2px;}
 .ai-company-item .ci-tag{font-size:10px;padding:2px 8px;border-radius:8px;
   background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;font-weight:600;flex-shrink:0;}
+.ci-applied{display:flex;align-items:center;gap:4px;font-size:11px;color:#888;flex-shrink:0;cursor:pointer;user-select:none;transition:color .2s;}
+.ci-applied:hover{color:#6366f1;}
+.ci-applied input[type="checkbox"]{width:14px;height:14px;cursor:pointer;accent-color:#6366f1;margin:0;}
+.ci-applied.checked{color:#22c55e;font-weight:600;}
 
 /* ===== 按钮 ===== */
 .btn-primary{background:linear-gradient(135deg,var(--primary),#c0280f);color:white;border:none;
@@ -2033,6 +2037,10 @@ function handleLogout() {
   state.powerup = false;
   state.milestones = [];
   state.checkedNodes = {};
+  state.treasureOpenedFor = {};
+  state.appliedCompanies = {};
+  state.activeModuleTab = 'career';
+  state.squareCache = null;
   state.sel = { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[], cert:[] };
   state.mbti = { answers:{}, result:null, q:0 };
   state.form = {};
@@ -2170,6 +2178,10 @@ async function loadUserPlan() {
       if (plan.form_data._step != null) {
         state._savedStep = plan.form_data._step;
       }
+      // 恢复上次活跃的模块 Tab
+      if (plan.form_data._activeTab) {
+        state.activeModuleTab = plan.form_data._activeTab;
+      }
       restoreFormData();
     }
     // 恢复标签选择
@@ -2246,6 +2258,14 @@ async function loadUserPlan() {
           if (aiResult.treasureOpenedFor) {
             state.treasureOpenedFor = aiResult.treasureOpenedFor;
           }
+          // 恢复公司投递记录
+          if (aiResult.appliedCompanies) {
+            state.appliedCompanies = aiResult.appliedCompanies;
+          }
+          // 恢复求职广场缓存
+          if (aiResult._squareCache) {
+            state.squareCache = aiResult._squareCache;
+          }
 
           // ===== 恢复 AI 建议列表和公司推荐 =====
           const adviceList = document.getElementById('adviceList');
@@ -2264,16 +2284,22 @@ async function loadUserPlan() {
             if (aiResult.companies && aiResult.companies.length) {
               html += `<div class="ai-suggestion-card fade-in" style="animation-delay:${(aiResult.advices?.length||0)*0.1}s;">
                 <div class="sug-title">🏢 推荐目标公司 <span style="font-size:11px;color:#6366f1;font-weight:400;">（点击查看招聘信息 →）</span></div>
-                <div class="ai-company-list">${aiResult.companies.map(c=>
-                  `<div class="ai-company-item" onclick="showCompanyLinks('${(c.name||'').replace(/'/g,"\\'")}')" style="cursor:pointer;" title="点击查看 ${c.name||''} 的招聘信息">
+                <div class="ai-company-list">${aiResult.companies.map(c=>{
+                  const cName = (c.name||'').replace(/'/g,"\\'");
+                  const isApplied = state.appliedCompanies && state.appliedCompanies[c.name];
+                  return `<div class="ai-company-item" onclick="showCompanyLinks('${cName}')" style="cursor:pointer;" title="点击查看 ${c.name||''} 的招聘信息" data-company="${cName}">
                     <span class="ci-logo">${c.logo||'🏢'}</span>
                     <div class="ci-info">
                       <div class="ci-name">${c.name||''} <span style="font-size:10px;color:#6366f1;">→ 查看招聘</span></div>
                       <div class="ci-desc">${c.desc||''}</div>
                     </div>
                     ${c.tag?`<span class="ci-tag">${c.tag}</span>`:''}
-                  </div>`
-                ).join('')}
+                    <label class="ci-applied ${isApplied?'checked':''}" onclick="event.stopPropagation()" title="标记为已投递">
+                      <input type="checkbox" ${isApplied?'checked':''} onchange="toggleApplied('${cName}',this)">
+                      <span>已投递</span>
+                    </label>
+                  </div>`;
+                }).join('')}
               </div>`;
             }
             adviceList.innerHTML = html;
@@ -2307,9 +2333,13 @@ async function loadUserPlan() {
           renderHRoadmap();
           showModuleTabs();
           refreshResumeModule();
-          initSquareFilters(); // 确保求职广场筛选器默认行业/城市与数据库一致
-          // 自动跳转到路线图页面
+          initSquareFilters();
+          // 跳转到路线图页面
           goToStep(4);
+          // 恢复刷前活跃的模块 Tab 和求职广场缓存
+          if (state.activeModuleTab && state.activeModuleTab !== 'career') {
+            setTimeout(() => switchModuleTab(state.activeModuleTab), 150);
+          }
           showToast('📂 已恢复你的职业规划路线图！');
           return;
         }
@@ -2383,6 +2413,8 @@ async function savePlanToServer(aiPlanJson) {
         const obj = JSON.parse(existing.plan.ai_plan);
         obj.checkedNodes = state.checkedNodes;
         obj.treasureOpenedFor = state.treasureOpenedFor;
+        obj.appliedCompanies = state.appliedCompanies;
+        obj._squareCache = state.squareCache;
         // 同步里程碑的 done 状态
         if (obj.milestones) {
           obj.milestones = obj.milestones.map(m => ({
@@ -2395,7 +2427,7 @@ async function savePlanToServer(aiPlanJson) {
     } catch(e) { console.warn('合并规划数据失败:', e); }
   }
   // 将 customTags 合并到 selected_tags 中持久化（key 用 _customTags 避免与 group 冲突）
-    const formWithMeta = { ...state.form, _avatar: state.avatar, _step: state.step };
+    const formWithMeta = { ...state.form, _avatar: state.avatar, _step: state.step, _activeTab: state.activeModuleTab };
     const selWithData = { ...state.sel, _customTags: customTags };
     const res = await api('/api/plan', {
       method: 'POST',
@@ -2706,14 +2738,19 @@ function switchModuleTab(tab) {
   if (tab === 'resume') {
     renderResumePreview();
   }
-  // 切换到求职广场时，初始化筛选器（若首次进入且无数据）
+  // 切换到求职广场时，初始化筛选器
   if (tab === 'square') {
     initSquareFilters();
-    // 若从未搜索过，自动触发首次 AI 匹配
+    // 若从未搜索过，尝试从缓存恢复；缓存失效则触发首次搜索
     if (!_squareLoaded) {
-      searchSquareJobs();
+      if (!_tryRestoreSquareCache()) {
+        searchSquareJobs();
+      }
     }
   }
+  // 记住当前活跃的模块 Tab（通过服务端持久化，刷新后恢复）
+  state.activeModuleTab = tab;
+  savePlanToServer(null).catch(() => {});
 }
 
 // 简历优化模块内部 Tab 切换（预览 / AI建议）
@@ -3326,6 +3363,39 @@ function renderJobCard(job) {
     </div>`;
 }
 
+// 保存求职广场搜索结果缓存（通过服务端持久化）
+function _saveSquareCache(industry, city, jobType) {
+  state.squareCache = {
+    jobs: _squareJobs,
+    filters: { industry, city, jobType }
+  };
+  savePlanToServer(null).catch(() => {});
+}
+
+// 尝试从缓存恢复搜索结果（并还原筛选条件）
+function _tryRestoreSquareCache() {
+  const cache = state.squareCache;
+  if (!cache || !cache.jobs || !cache.jobs.length) return false;
+  // 将下拉框还原为缓存时的筛选值，再对比确认
+  const indSel = document.getElementById('sqFilterIndustry');
+  const citySel = document.getElementById('sqFilterCity');
+  const jobTypeSel = document.getElementById('sqFilterJobType');
+  if (indSel) indSel.value = cache.filters.industry;
+  if (citySel) citySel.value = cache.filters.city;
+  if (jobTypeSel) jobTypeSel.value = cache.filters.jobType;
+  // 恢复结果
+  _squareJobs = cache.jobs;
+  _squareLoaded = true;
+  const jobListEl = document.getElementById('sqJobList');
+  if (jobListEl) jobListEl.innerHTML = cache.jobs.map(renderJobCard).join('');
+  const statusBar = document.getElementById('sqStatusBar');
+  if (statusBar) {
+    statusBar.style.display = 'flex';
+    document.getElementById('sqCountLabel').textContent = `🎯 为你匹配了 ${cache.jobs.length} 个岗位`;
+  }
+  return true;
+}
+
 // 主函数：AI 搜索岗位
 async function searchSquareJobs(isRefresh) {
   if (_squareLoading) return;
@@ -3370,6 +3440,8 @@ async function searchSquareJobs(isRefresh) {
         statusBar.style.display = 'flex';
         document.getElementById('sqCountLabel').textContent = `🎯 为你匹配了 ${jobs.length} 个岗位`;
       }
+      // 缓存搜索结果到 localStorage，刷新后可直接恢复
+      _saveSquareCache(industry, city, jobType);
     }
 
   } catch(e) {
@@ -3565,6 +3637,22 @@ async function fetchGwyLinksHTML() {
   return '';
 }
 
+// 切换公司投递状态
+function toggleApplied(companyName, checkboxEl) {
+  event.stopPropagation(); // 阻止冒泡，避免触发卡片点击
+  if (!state.appliedCompanies) state.appliedCompanies = {};
+  if (checkboxEl.checked) {
+    state.appliedCompanies[companyName] = true;
+  } else {
+    delete state.appliedCompanies[companyName];
+  }
+  // 更新父元素样式
+  const label = checkboxEl.closest('.ci-applied');
+  if (label) label.classList.toggle('checked', checkboxEl.checked);
+  // 异步保存到服务器
+  savePlanToServer(null).catch(() => {});
+}
+
 async function showCompanyLinks(companyName) {
   // 取用户选择的期望就业城市（取第一个），用于事业单位按省份筛选
   const userCity = (state.sel.city || [])[0] || '';
@@ -3642,6 +3730,9 @@ const state = {
   milestones: [],     // 路标数据
   checkedNodes: {},   // {nodeId: {note, extra, time}}
   treasureOpenedFor: {}, // {nodeId: {opened: true, data: {...}}}
+  appliedCompanies: {}, // {companyName: true} 已投递公司记录
+  activeModuleTab: 'career', // 当前活跃的模块 Tab
+  squareCache: null, // 求职广场搜索结果缓存 {jobs, filters}
   sel: { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[], cert:[] },
   mbti: { answers:{}, result:null, q:0 },
   form: {},           // 简历保留数据
@@ -4948,19 +5039,26 @@ async function generatePlan() {
           <div class="sug-text">${a.text||''}</div>
         </div>`).join('');
     }
-    // 渲染推荐公司（带招聘跳转链接）
+    // 渲染推荐公司（带招聘跳转链接 + 投递标记）
     if (result.companies && result.companies.length) {
       html += `<div class="ai-suggestion-card fade-in" style="animation-delay:${(result.advices?.length||0)*0.1}s;">
         <div class="sug-title">🏢 推荐目标公司 <span style="font-size:11px;color:#6366f1;font-weight:400;">（点击查看招聘信息 →）</span></div>
-        <div class="ai-company-list">${result.companies.map(c=>
-          `<div class="ai-company-item" onclick="showCompanyLinks('${(c.name||'').replace(/'/g,"\\'")}')" style="cursor:pointer;" title="点击查看 ${c.name||''} 的招聘信息">
+        <div class="ai-company-list">${result.companies.map(c=>{
+          const cName = (c.name||'').replace(/'/g,"\\'");
+          const isApplied = state.appliedCompanies && state.appliedCompanies[c.name];
+          return `<div class="ai-company-item" onclick="showCompanyLinks('${cName}')" style="cursor:pointer;" title="点击查看 ${c.name||''} 的招聘信息" data-company="${cName}">
             <span class="ci-logo">${c.logo||'🏢'}</span>
             <div class="ci-info">
               <div class="ci-name">${c.name||''} <span style="font-size:10px;color:#6366f1;">→ 查看招聘</span></div>
               <div class="ci-desc">${c.desc||''}</div>
             </div>
             ${c.tag?`<span class="ci-tag">${c.tag}</span>`:''}
-          </div>`).join('')}
+            <label class="ci-applied ${isApplied?'checked':''}" onclick="event.stopPropagation()" title="标记为已投递">
+              <input type="checkbox" ${isApplied?'checked':''} onchange="toggleApplied('${cName}',this)">
+              <span>已投递</span>
+            </label>
+          </div>`;
+        }).join('')}
         </div>
       </div>`;
     }
@@ -4973,9 +5071,11 @@ async function generatePlan() {
     }
 
     // 用AI返回的milestones渲染路线图
-    // 重新生成规划时，重置所有打卡记录和宝箱数据
+    // 重新生成规划时，重置所有打卡记录、宝箱数据和投递记录
     state.checkedNodes = {};
     state.treasureOpenedFor = {};
+    state.appliedCompanies = {};
+    state.squareCache = null;
 
     if (result.milestones && result.milestones.length) {
       state.milestones = result.milestones.map(m=>({
@@ -5018,9 +5118,11 @@ async function generatePlan() {
       <div class="advice-content"><strong>${a.title}</strong><p>${a.text}</p></div>
     </div>`).join('');
 
-  // 重新生成规划时，重置所有打卡记录和宝箱数据
+  // 重新生成规划时，重置所有打卡记录、宝箱数据和投递记录
   state.checkedNodes = {};
   state.treasureOpenedFor = {};
+  state.appliedCompanies = {};
+  state.squareCache = null;
 
   state.milestones = genMilestones(grade, gradYear, industry, company);
   renderHRoadmap();
@@ -5857,7 +5959,24 @@ function dinoDrawDino() {
 
 function dinoDrawObstacle(ob) {
   const g = dinoGame;
-  // 连击时障碍物颜色变化
+  if (ob.type === 'mushroom') {
+    // 蘑菇：红色伞盖 + 白色杆
+    g.ctx.fillStyle = '#e53935';
+    g.ctx.beginPath();
+    g.ctx.arc(ob.x + ob.w/2, ob.y + 10, 10, Math.PI, 0);
+    g.ctx.fill();
+    // 白色斑点
+    g.ctx.fillStyle = '#fff';
+    g.ctx.beginPath();
+    g.ctx.arc(ob.x + ob.w/2 - 4, ob.y + 6, 2.5, 0, Math.PI*2);
+    g.ctx.arc(ob.x + ob.w/2 + 5, ob.y + 8, 2, 0, Math.PI*2);
+    g.ctx.fill();
+    // 杆
+    g.ctx.fillStyle = '#f5f5f5';
+    g.ctx.fillRect(ob.x + ob.w/2 - 3, ob.y + 10, 6, ob.h - 10);
+    return;
+  }
+  // 普通障碍物（仙人掌）
   g.ctx.fillStyle = '#2d7d3a';
   if (g.combo >= 5) {
     g.ctx.fillStyle = g.combo >= 10 ? '#aa2222' : '#cc6622';
@@ -5884,19 +6003,40 @@ function dinoLoop() {
   if (g.dino.y >= g.H-40) { g.dino.y = g.H-40; g.dino.vy = 0; g.dino.onGround = true; }
   dinoDrawDino();
 
-  // 生成障碍物（提高出现频率，更快达到连击）
-  const spawnInterval = Math.max(35, 55 - g.speed * 3);  // 更短的间隔
-  if (g.frame % spawnInterval === 0) {
-    g.obstacles.push({ x: g.W+10, y: g.H-55, w: 14, h: 36 });
+  // 生成普通障碍物：每 50 帧（约 0.83 秒），间距约 200px
+  if (g.frame % 50 === 0) {
+    // 检查是否与即将生成的蘑菇太近（蘑菇在 frame % 130 生成）
+    const framesToMushroom = 130 - (g.frame % 130);
+    const mushroomWillSpawnSoon = framesToMushroom <= 15 && framesToMushroom > 0;
+    if (!mushroomWillSpawnSoon) {
+      g.obstacles.push({ x: g.W+10, y: g.H-55, w: 14, h: 36 });
+    }
+  }
+  // 生成蘑菇：每 130 帧出现一次，且不与现有障碍物太近
+  if (g.frame % 130 === 0) {
+    const tooClose = g.obstacles.some(ob => ob.x > g.W - 80);
+    if (!tooClose) {
+      g.obstacles.push({ type: 'mushroom', x: g.W+10, y: g.H-38, w: 20, h: 18 });
+    }
   }
 
   // 更新障碍物 + 碰撞检测 + 连击逻辑
   let passedThisFrame = false;
+  let stompedThisFrame = false;
   g.obstacles = g.obstacles.filter(ob => {
     ob.x -= g.speed;
     dinoDrawObstacle(ob);
     const d = g.dino;
     if (ob.x < d.x+d.w && ob.x+ob.w > d.x && ob.y < d.y+d.h && ob.y+ob.h > d.y) {
+      // 蘑菇可以踩：从上方落下且vy向下
+      if (ob.type === 'mushroom' && d.vy > 0 && d.y + d.h < ob.y + ob.h * 0.6) {
+        d.vy = -9; // 踩蘑菇弹起
+        g.score += 5;
+        stompedThisFrame = true;
+        g._stompPop = { frame: g.frame, x: d.x + 10, y: d.y - 10 };
+        return false; // 蘑菇消失
+      }
+      // 普通障碍物或侧面撞蘑菇 → 游戏结束
       g.over = true;
       g.running = false;
       g.ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -5909,18 +6049,30 @@ function dinoLoop() {
       g.ctx.fillText('最高连击: ' + g.maxCombo + ' | 点击或按空格重来', g.W/2, g.H/2+15);
       return false;
     }
-    // 障碍物通过后的连击计数
+    // 障碍物通过后的连击计数（蘑菇也算）
     if (!ob.passed && ob.x + ob.w < d.x) {
       ob.passed = true;
       passedThisFrame = true;
     }
     return ob.x > -30;
   });
-
-  // 更新连击数
-  if (passedThisFrame && !g.over) {
+  // 更新连击数（通过障碍或踩蘑菇）
+  if ((passedThisFrame || stompedThisFrame) && !g.over) {
     g.combo++;
     if (g.combo > g.maxCombo) g.maxCombo = g.combo;
+  }
+
+  // 踩蘑菇弹出 +5 文字
+  if (g._stompPop) {
+    const age = g.frame - g._stompPop.frame;
+    if (age < 30) {
+      g.ctx.fillStyle = `rgba(229,57,53,${1 - age/30})`;
+      g.ctx.font = 'bold 14px sans-serif';
+      g.ctx.textAlign = 'center';
+      g.ctx.fillText('+5', g._stompPop.x, g._stompPop.y - age);
+    } else {
+      g._stompPop = null;
+    }
   }
 
   // 分数（基于帧数和连击加成）
@@ -5967,7 +6119,7 @@ function startDinoGame() {
   dinoGame = {
     running: true, over: false, score: 0, combo: 0, maxCombo: 0, animId: null,
     dino: { x:40, y:H-40, w:28, h:36, vy:0, onGround:true },
-    obstacles: [], frame: 0, speed: 3, W, H, ctx, canvas
+    obstacles: [], frame: 0, speed: 4, W, H, ctx, canvas
   };
 
   if (dinoGame.animId) cancelAnimationFrame(dinoGame.animId);
