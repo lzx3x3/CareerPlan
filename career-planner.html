@@ -1526,8 +1526,40 @@ body{font-family:var(--font-main);background:var(--bg-sky);min-height:100vh;over
         </div>
       </div>
       <button class="add-btn" onclick="addPublication()">＋ 添加学术成果</button>
-      <div style="height:6px;"></div>
-      <textarea class="form-input" id="otherAchieve" rows="2" placeholder="其他荣誉/社团经历（选填）" style="resize:none;"></textarea>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.22s;">
+      <div class="card-title"><span class="ti">🏅</span>荣誉奖项</div>
+      <div class="experience-list" id="awardList">
+        <div class="exp-item">
+          <div class="exp-header">
+            <input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="奖项名称" type="text">
+            <button class="exp-remove" onclick="removeExp(this)">×</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:6px;">
+            <input class="form-input" style="flex:1;" placeholder="获奖等级（如：一等奖/金牌）" type="text">
+            <input class="form-input" style="flex:1;" placeholder="年份" type="text">
+          </div>
+          <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="颁发单位、比赛规模、项目描述等（选填）" type="text"></textarea>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addAward()">＋ 添加荣誉奖项</button>
+    </div>
+    <div class="card fade-in" style="animation-delay:0.24s;">
+      <div class="card-title"><span class="ti">🤝</span>社团经历</div>
+      <div class="experience-list" id="clubList">
+        <div class="exp-item">
+          <div class="exp-header">
+            <input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="社团/组织名称" type="text">
+            <button class="exp-remove" onclick="removeExp(this)">×</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:6px;">
+            <input class="form-input" style="flex:1;" placeholder="担任职务" type="text">
+            <input class="form-input" style="flex:1;" placeholder="时间（如：2024-2025）" type="text">
+          </div>
+          <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="活动内容、组织规模、个人贡献等（选填）" type="text"></textarea>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addClubExperience()">＋ 添加社团经历</button>
     </div>
     <button class="btn-primary" onclick="generatePlan()">🗺️ 生成我的职业规划路径图！</button>
   </div>
@@ -2061,15 +2093,15 @@ function handleLogout() {
   document.querySelectorAll('.tag-item.custom-tag').forEach(el => el.remove());
 
   // 4. 清空表单 inputs
-  ['userAge','userMajor','userGPA','userSchool','otherAchieve','userSchoolLevel'].forEach(id => {
+  ['userAge','userMajor','userGPA','userSchool','userSchoolLevel'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   ['userDegree','userGrade','userGradYear'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
 
-  // 5. 清空实习/竞赛/学术/证书列表（保留第一个空白模板项）
-  ['internshipList','competitionList','publicationList'].forEach(listId => {
+  // 5. 清空实习/竞赛/学术/荣誉/社团列表（保留第一个空白模板项）
+  ['internshipList','competitionList','publicationList','awardList','clubList'].forEach(listId => {
     const list = document.getElementById(listId);
     if (!list) return;
     const items = list.querySelectorAll('.exp-item');
@@ -2135,6 +2167,9 @@ function handleLogout() {
   closeUserDropdown();
   showAuthOverlay();
   showToast('👋 已退出登录');
+
+  // 标记为刚刚退出，下次登录后回到首页
+  try { sessionStorage.setItem('career_fresh_login', '1'); } catch(e) {}
 }
 
 function toggleUserDropdown() {
@@ -2334,13 +2369,25 @@ async function loadUserPlan() {
           showModuleTabs();
           refreshResumeModule();
           initSquareFilters();
-          // 跳转到路线图页面
-          goToStep(4);
-          // 恢复刷前活跃的模块 Tab 和求职广场缓存
-          if (state.activeModuleTab && state.activeModuleTab !== 'career') {
-            setTimeout(() => switchModuleTab(state.activeModuleTab), 150);
+
+          // 检查是否是退出后重新登录：是则回到首页，否则跳转到路线图
+          let isFreshLogin = false;
+          try {
+            isFreshLogin = sessionStorage.getItem('career_fresh_login') === '1';
+            if (isFreshLogin) sessionStorage.removeItem('career_fresh_login');
+          } catch(e) {}
+
+          if (isFreshLogin) {
+            goToStep(0);
+            showToast('📂 已恢复数据，点击「开始我的职业冒险」继续！');
+          } else {
+            goToStep(4);
+            // 恢复刷前活跃的模块 Tab 和求职广场缓存
+            if (state.activeModuleTab && state.activeModuleTab !== 'career') {
+              setTimeout(() => switchModuleTab(state.activeModuleTab), 150);
+            }
+            showToast('📂 已恢复你的职业规划路线图！');
           }
-          showToast('📂 已恢复你的职业规划路线图！');
           return;
         }
       } catch(e) { console.warn('恢复AI规划失败:', e); }
@@ -2805,6 +2852,9 @@ function saveResumeToPreview() {
   const expData = collectExperienceData();
   state.form.internships = expData.internships;
   state.form.competitions = expData.competitions;
+  state.form.publications = expData.publications;
+  state.form.awards = expData.awards;
+  state.form.clubs = expData.clubs;
 
   // 按钮反馈
   const btn = document.getElementById('btnSaveResume');
@@ -2876,7 +2926,8 @@ function renderResumePreview() {
         ${ints.length ? sec('实习经历', ints.map(i=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:12px;">${i.company||''}</div><div style="font-size:11px;color:#555;margin-top:1px;">${i.role||''}${i.note ? ' · '+i.note : ''}${i.detail ? '<br><span style="color:#888;">'+i.detail+'</span>' : ''}${i.feeling ? '<br><span style="color:#666;font-style:italic;">'+i.feeling+'</span>' : ''}</div></div>`).join('')) : sec('实习经历','<span style="color:#ccc;font-size:11px;">暂无实习经历</span>')}
         ${comps.length ? sec('竞赛 & 荣誉', comps.map(c=>`<div style="margin-bottom:6px;font-size:11px;">🏆 ${c.name||c.compname||''}${c.award ? ' · '+c.award : ''}${c.note ? '<br><span style="color:#888;">'+c.note+'</span>' : ''}${c.feeling ? '<br><span style="color:#666;font-style:italic;">'+c.feeling+'</span>' : ''}</div>`).join('')) : ''}
         ${certs.length ? sec('证书', certs.map(c=>`<span class="rp-tag">${c.name||c.type||''}${c.grade?' '+c.grade:''}</span>`).join(' ')) : ''}
-        ${f.other ? sec('其他荣誉',`<div style="font-size:11px;color:#555;">${f.other}</div>`) : ''}
+        ${(f.awards||[]).length ? sec('荣誉奖项', f.awards.map(a=>`<div style="margin-bottom:4px;font-size:11px;">🏅 ${a.name||''}${a.award?' · '+a.award:''}${a.year?' · '+a.year:''}${a.note?'<br><span style="color:#888;">'+a.note+'</span>':''}</div>`).join('')) : ''}
+        ${(f.clubs||[]).length ? sec('社团经历', f.clubs.map(c=>`<div style="margin-bottom:4px;font-size:11px;">🤝 ${c.name||''}${c.role?' · '+c.role:''}${c.time?' · '+c.time:''}${c.note?'<br><span style="color:#888;">'+c.note+'</span>':''}</div>`).join('')) : ''}
         ${pubs.length ? sec('学术成果', pubs.map(p=>`<div style="margin-bottom:6px;font-size:11px;">📄 ${p.title||''} ${p.type?'· '+p.type:''}${p.note ? '<br><span style="color:#888;">'+p.note+'</span>' : ''}${p.feeling ? '<br><span style="color:#666;font-style:italic;">'+p.feeling+'</span>' : ''}</div>`).join('')) : ''}
       </div>
     </div>`;
@@ -2923,7 +2974,7 @@ function renderResumePreview() {
     <div class="rp-body">
       <div class="rp-card">${schoolLvl?`<div style="font-weight:700;font-size:13px;">${f.school}</div><div style="font-size:11px;color:#666;margin-top:2px;">${schoolLvl} · ${f.major} · ${degree}</div>`:'<span style="color:#ccc;">请完善教育信息</span>'}</div>
       <div class="rp-card">${ints.length?ints.map(i=>`<div style="margin-bottom:6px;"><span style="font-weight:700;">${i.company||''}</span> ${i.role?'· '+i.role:''}<br><span style="font-size:10px;color:#888;">${i.note||''}${i.detail?'<br>'+i.detail:''}</span>${i.feeling?'<br><span style="font-size:10px;color:#666;font-style:italic;">'+i.feeling+'</span>':''}</div>`).join(''):'<span style="color:#ccc;font-size:11px;">暂无实习经历</span>'}</div>
-      <div class="rp-card">${comps.length?comps.map(c=>`<div style="font-size:11px;margin-bottom:4px;">🏆 ${c.name||c.compname||''}${c.award?' · '+c.award:''}${c.note?'<br><span style="color:#888;">'+c.note+'</span>':''}${c.feeling?'<br><span style="color:#666;font-style:italic;">'+c.feeling+'</span>':''}</div>`).join(''):''}${f.other?`<div style="font-size:11px;color:#555;margin-top:4px;">${f.other}</div>`:''}</div>
+      <div class="rp-card">${comps.length?comps.map(c=>`<div style="font-size:11px;margin-bottom:4px;">🏆 ${c.name||c.compname||''}${c.award?' · '+c.award:''}${c.note?'<br><span style="color:#888;">'+c.note+'</span>':''}${c.feeling?'<br><span style="color:#666;font-style:italic;">'+c.feeling+'</span>':''}</div>`).join(''):''}${(f.awards||[]).length?`<div style="font-size:11px;color:#555;margin-top:4px;">${f.awards.map(a=>'🏅 '+a.name+(a.award?' · '+a.award:'')+(a.year?' · '+a.year:'')).join('、')}</div>`:''}${(f.clubs||[]).length?`<div style="font-size:11px;color:#555;margin-top:4px;">${f.clubs.map(c=>'🤝 '+c.name+(c.role?' · '+c.role:'')+(c.time?' · '+c.time:'')).join('、')}</div>`:''}</div>
       <div class="rp-card">${skills.length?skills.map(s=>`<span class="rp-tag">${s}</span>`).join(' '):''}${engs.length?`<div style="margin-top:4px;font-size:11px;color:#666;">${engs.join(' / ')}</div>`:''}</div>
       ${certs.length?`<div class="rp-card">${certs.map(c=>`<span class="rp-tag">${c.name||c.type||''}${c.grade?' '+c.grade:''}</span>`).join(' ')}</div>`:''}
     </div>`;
@@ -3076,7 +3127,8 @@ async function analyzeResume() {
 - 证书：${certs||'无'}
 - 实习经历：${(f.internships||[]).length>0?(f.internships.map(i=>`${i.company}(${i.role})`).join('、')):'无'}
 - 竞赛经历：${(f.competitions||[]).length>0?(f.competitions.map(c=>`${c.name||c.compname||''}(${c.award||''})`).join('、')):'无'}
-- 其他荣誉：${f.other||'无'}`.trim();
+- 荣誉奖项：${(f.awards||[]).length>0?(f.awards.map(a=>`${a.name||''}(${a.award||''},${a.year||''})`).join('、')):'无'}
+- 社团经历：${(f.clubs||[]).length>0?(f.clubs.map(c=>`${c.name||''}(${c.role||''},${c.time||''})`).join('、')):'无'}`.trim();
 
     const systemPrompt = `你是一名专业的HR和职业顾问，擅长简历诊断和优化建议。
 请分析学生的简历，按照以下JSON格式返回（不要有其他文字）：
@@ -3745,11 +3797,13 @@ const state = {
 const ResumeDataManager = {
   // 统一数据结构
   data: {
-    basic: { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'', other:'' },
+    basic: { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'' },
     internships: [],   // {company, role, start, end, note, detail, feeling}
     competitions: [],  // {name, award, year, note, feeling}
     publications: [],  // {title, type, year, note, feeling}
     certs: [],         // {type, name, grade, year}
+    awards: [],        // {name, award, year, note, feeling}
+    clubs: [],         // {name, role, time, note, feeling}
     otherExperiences: [] // {label, note, detail, feeling}
   },
 
@@ -3764,13 +3818,14 @@ const ResumeDataManager = {
       school: f.school || '',
       schoolLevel: f.schoolLevel || '',
       gradYear: f.gradYear || '',
-      gpa: f.gpa || '',
-      other: f.other || ''
+      gpa: f.gpa || ''
     };
     this.data.internships = f.internships || [];
     this.data.competitions = f.competitions || [];
     this.data.publications = f.publications || [];
     this.data.certs = f.certs || [];
+    this.data.awards = f.awards || [];
+    this.data.clubs = f.clubs || [];
     this.data.otherExperiences = f.otherExperiences || [];
     return this.data;
   },
@@ -3783,6 +3838,8 @@ const ResumeDataManager = {
     state.form.competitions = this.data.competitions;
     state.form.publications = this.data.publications;
     state.form.certs = this.data.certs;
+    state.form.awards = this.data.awards;
+    state.form.clubs = this.data.clubs;
     state.form.otherExperiences = this.data.otherExperiences;
     return state.form;
   },
@@ -3850,11 +3907,13 @@ const ResumeDataManager = {
 
   // 清空所有数据
   clear() {
-    this.data.basic = { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'', other:'' };
+    this.data.basic = { age:'', major:'', degree:'', grade:'', school:'', schoolLevel:'', gradYear:'', gpa:'' };
     this.data.internships = [];
     this.data.competitions = [];
     this.data.publications = [];
     this.data.certs = [];
+    this.data.awards = [];
+    this.data.clubs = [];
     this.data.otherExperiences = [];
     this.syncToForm();
   }
@@ -4555,6 +4614,30 @@ function addPublication(){
     </details>`;
   l.appendChild(d);
 }
+function addAward(){
+  const l=document.getElementById('awardList'),d=document.createElement('div');
+  d.className='exp-item fade-in';
+  d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="奖项名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="获奖等级（如：一等奖/金牌）" type="text"><input class="form-input" style="flex:1;" placeholder="年份" type="text"></div>
+    <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="颁发单位、比赛规模、项目描述等（选填）"></textarea>
+    <details style="margin-top:6px;font-size:12px;color:#666;">
+      <summary style="cursor:pointer;">💬 心得感悟（可选）</summary>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="获奖感想等"></textarea>
+    </details>`;
+  l.appendChild(d);
+}
+function addClubExperience(){
+  const l=document.getElementById('clubList'),d=document.createElement('div');
+  d.className='exp-item fade-in';
+  d.innerHTML=`<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="社团/组织名称" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+    <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="担任职务" type="text"><input class="form-input" style="flex:1;" placeholder="时间（如：2024-2025）" type="text"></div>
+    <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="活动内容、组织规模、个人贡献等（选填）"></textarea>
+    <details style="margin-top:6px;font-size:12px;color:#666;">
+      <summary style="cursor:pointer;">💬 心得感悟（可选）</summary>
+      <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="活动总结等"></textarea>
+    </details>`;
+  l.appendChild(d);
+}
 function removeExp(btn){
   const i=btn.closest('.exp-item');
   i.style.cssText='transform:scale(0.85);opacity:0;transition:all 0.3s;';
@@ -4612,13 +4695,14 @@ function saveFormData() {
     schoolLevel: document.getElementById('userSchoolLevel').value,
     gradYear: document.getElementById('userGradYear').value,
     gpa: document.getElementById('userGPA').value,
-    other: document.getElementById('otherAchieve').value,
   };
   // 收集动态列表数据（从 DOM 读取最新值）
   const expData = collectExperienceData();
   ResumeDataManager.data.internships = expData.internships;
   ResumeDataManager.data.competitions = expData.competitions;
   ResumeDataManager.data.publications = expData.publications;
+  ResumeDataManager.data.awards = expData.awards;
+  ResumeDataManager.data.clubs = expData.clubs;
   ResumeDataManager.data.certs = collectCertData();
 
   // 同步到 state.form（用于服务端持久化）
@@ -4639,7 +4723,32 @@ function restoreFormData() {
   if (f.schoolLevel) document.getElementById('userSchoolLevel').value = f.schoolLevel;
   if (f.gradYear) document.getElementById('userGradYear').value = f.gradYear;
   if (f.gpa) document.getElementById('userGPA').value = f.gpa;
-  if (f.other) document.getElementById('otherAchieve').value = f.other;
+  // 恢复荣誉奖项
+  const awardList = document.getElementById('awardList');
+  if (awardList) {
+    awardList.innerHTML = '';
+    (data.awards||[]).forEach(item => {
+      const div = document.createElement('div'); div.className = 'exp-item fade-in';
+      div.innerHTML = `<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="奖项名称" value="${item.name||''}" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+        <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="获奖等级" value="${item.award||''}" type="text"><input class="form-input" style="flex:1;" placeholder="年份" value="${item.year||''}" type="text"></div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="颁发单位、比赛规模等">${item.note||''}</textarea>
+        ${item.feeling ? `<details style="margin-top:6px;font-size:12px;color:#666;"><summary style="cursor:pointer;">💬 心得感悟</summary><textarea class="form-input" style="margin-top:6px;" rows="2">${item.feeling}</textarea></details>` : ''}`;
+      awardList.appendChild(div);
+    });
+  }
+  // 恢复社团经历
+  const clubList = document.getElementById('clubList');
+  if (clubList) {
+    clubList.innerHTML = '';
+    (data.clubs||[]).forEach(item => {
+      const div = document.createElement('div'); div.className = 'exp-item fade-in';
+      div.innerHTML = `<div class="exp-header"><input class="form-input exp-title-input" style="margin:0;font-weight:700;" placeholder="社团/组织名称" value="${item.name||''}" type="text"><button class="exp-remove" onclick="removeExp(this)">×</button></div>
+        <div style="display:flex;gap:7px;margin-top:6px;"><input class="form-input" style="flex:1;" placeholder="担任职务" value="${item.role||''}" type="text"><input class="form-input" style="flex:1;" placeholder="时间" value="${item.time||''}" type="text"></div>
+        <textarea class="form-input" style="margin-top:6px;" rows="2" placeholder="活动内容等">${item.note||''}</textarea>
+        ${item.feeling ? `<details style="margin-top:6px;font-size:12px;color:#666;"><summary style="cursor:pointer;">💬 心得感悟</summary><textarea class="form-input" style="margin-top:6px;" rows="2">${item.feeling}</textarea></details>` : ''}`;
+      clubList.appendChild(div);
+    });
+  }
 
   // 恢复实习经历（包含完整字段）
   const internshipList = document.getElementById('internshipList');
@@ -4785,19 +4894,57 @@ function replanKeepData() {
     showToast('✏️ 已保留你的信息，可修改后重新生成');
   }, 300);
 }
-function replanFresh() {
-  // 重置选择和表单，但保留金币和成就
+async function replanFresh() {
+  // 1. 清除 AI 规划相关数据
+  state.milestones = [];
+  state.checkedNodes = {};
+  state.treasureOpenedFor = {};
+  state.appliedCompanies = {};
+  state.squareCache = null;
+  state.activeModuleTab = 'career';
+
+  // 2. 清除 DOM
+  const adviceList = document.getElementById('adviceList');
+  if (adviceList) adviceList.innerHTML = '';
+  const roadmapTrack = document.getElementById('roadmapTrackH');
+  if (roadmapTrack) roadmapTrack.querySelectorAll('.rm-node').forEach(el => el.remove());
+  document.getElementById('summaryEmoji').textContent = '🦉';
+  document.getElementById('summaryTitle').textContent = '职业冒险者，出发！';
+  document.getElementById('summaryDesc').textContent = '';
+
+  // 3. 隐藏模块 Tab
+  const tabs = document.getElementById('moduleTabs');
+  if (tabs) tabs.style.display = 'none';
+
+  // 4. 重置选择和表单（保留金币和成就）
   state.sel = { industry:[], job:[], company:[], city:[], goal:[], eng:[], skill:[], cert:[] };
   state.mbti = { answers:{}, result:null, q:0 };
-  // 清空统一数据管理器
   ResumeDataManager.clear();
   document.querySelectorAll('.tag-item.selected').forEach(el=>el.classList.remove('selected'));
-  ['userAge','userMajor','userGPA','userSchool','otherAchieve'].forEach(id=>{
+  document.querySelectorAll('.tag-item.custom-tag').forEach(el=>el.remove());
+  ['userAge','userMajor','userGPA','userSchool','otherAwards','otherClub','userSchoolLevel'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   ['userDegree','userGrade','userGradYear'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  // 清空实习/竞赛/学术/荣誉/社团列表
+  ['internshipList','competitionList','publicationList','awardList','clubList'].forEach(listId => {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    const items = list.querySelectorAll('.exp-item');
+    items.forEach((item, i) => { if (i > 0) item.remove(); });
+    list.querySelectorAll('input, textarea').forEach(inp => { inp.value = ''; });
+    list.querySelectorAll('select').forEach(sel => { sel.selectedIndex = 0; });
+  });
+  const certList = document.getElementById('certList');
+  if (certList) { certList.innerHTML = ''; addCertEntry(); }
+
+  // 5. 清空服务端 AI 规划数据
+  try {
+    await savePlanToServer(JSON.stringify({ advices: [], companies: [], milestones: [] }));
+  } catch(e) { /* 静默失败 */ }
+
   goToStep(0);
   showToast('🔄 已重置，开始新的冒险！');
 }
@@ -4829,9 +4976,9 @@ const levelMap = {bachelor:'本科',master:'硕士',phd:'博士'};
 const schoolLevelMap = {985:'985高校',211:'211高校',double_first:'双一流高校',regular:'普通本科',
   junior_college:'专科/高职院校',overseas_top:'海外名校(QS前100)',overseas:'海外普通高校'};
 
-// 收集实习/竞赛/学术数据（完整字段）
+// 收集实习/竞赛/学术/荣誉/社团数据（完整字段）
 function collectExperienceData() {
-  const internships=[], competitions=[], publications=[];
+  const internships=[], competitions=[], publications=[], awards=[], clubs=[];
   document.querySelectorAll('#internshipList .exp-item').forEach(item=>{
     const inputs = item.querySelectorAll('input');
     const textareas = item.querySelectorAll('textarea');
@@ -4874,7 +5021,31 @@ function collectExperienceData() {
     // 跳过全空的条目
     if (data.title || data.type || data.note) publications.push(data);
   });
-  return {internships, competitions, publications};
+  document.querySelectorAll('#awardList .exp-item').forEach(item=>{
+    const inputs = item.querySelectorAll('input');
+    const textareas = item.querySelectorAll('textarea');
+    const data = {
+      name: inputs[0]?.value||'',
+      award: inputs[1]?.value||'',
+      year: inputs[2]?.value||'',
+      note: textareas[0]?.value||'',
+      feeling: textareas[1]?.value||''
+    };
+    if (data.name || data.award || data.note) awards.push(data);
+  });
+  document.querySelectorAll('#clubList .exp-item').forEach(item=>{
+    const inputs = item.querySelectorAll('input');
+    const textareas = item.querySelectorAll('textarea');
+    const data = {
+      name: inputs[0]?.value||'',
+      role: inputs[1]?.value||'',
+      time: inputs[2]?.value||'',
+      note: textareas[0]?.value||'',
+      feeling: textareas[1]?.value||''
+    };
+    if (data.name || data.role || data.note) clubs.push(data);
+  });
+  return {internships, competitions, publications, awards, clubs};
 }
 
 // 测试 API Key（支持服务端 Key 或用户自定义 Key）
@@ -4956,7 +5127,8 @@ function buildAIPrompt() {
   // 证书信息（从表单收集）
   const certData = collectCertData();
   if (certData.length) expInfo += '\n已获证书:\n'+certData.map((c,i)=>`${i+1}. ${c.displayName}` + (c.time ? ` (${c.time}获取)` : '') + (c.grade ? ` ${c.grade}` : '')).join('\n');
-  if (f.other) expInfo += '\n其他:'+f.other;
+  if (expData.awards.length) expInfo += '\n荣誉奖项:\n'+expData.awards.map((a,i)=>`${i+1}. ${a.name} ${a.award} (${a.year})`).join('\n');
+  if (expData.clubs.length) expInfo += '\n社团经历:\n'+expData.clubs.map((c,i)=>`${i+1}. ${c.name} ${c.role} (${c.time})`).join('\n');
 
   const systemPrompt = `你是一位资深的就业指导专家，擅长为大学生/研究生制定个性化的职业发展方案。请根据用户的基本信息、发展意向和经历，给出专业、具体、可操作的职业规划建议。
 
