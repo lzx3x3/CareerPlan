@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Career Planner"
+    },
+    {
+      "name": "module_desc",
+      "value": "Smart Career Planning Assistant"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Career Planner Main Page"
+    },
+    {
+      "name": "loading_text",
+      "value": "Loading..."
+    },
+    {
+      "name": "error_title",
+      "value": "Connection Failed"
+    },
+    {
+      "name": "error_desc",
+      "value": "Unable to connect to server"
+    },
+    {
+      "name": "retry_button",
+      "value": "Retry"
+    }
+  ]
+}

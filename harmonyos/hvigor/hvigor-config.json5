@@ -1,0 +1,9 @@
+{
+  "model": "stage",
+  "hvigorVersion": "3.2.0",
+  "dependencies": {
+    "@hvigor/hvigor-plugin-api": "3.2.0",
+    "@hvigor/hvigor-arkts-plugin": "3.2.0",
+    "@hvigor/hvigor-ohos-plugin": "3.2.0"
+  }
+}

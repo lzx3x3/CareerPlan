@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "职画"
+    },
+    {
+      "name": "module_desc",
+      "value": "智能职业规划助手"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "职画主页面"
+    },
+    {
+      "name": "loading_text",
+      "value": "正在加载..."
+    },
+    {
+      "name": "error_title",
+      "value": "连接失败"
+    },
+    {
+      "name": "error_desc",
+      "value": "无法连接到服务器"
+    },
+    {
+      "name": "retry_button",
+      "value": "重新加载"
+    }
+  ]
+}

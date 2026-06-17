@@ -1,0 +1,10 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "职画应用主模块",
+  "main": "",
+  "dependencies": {
+    "@ohos/hypium": "1.0.0",
+    "@ohos/hvigor-ohos-test": "1.0.0"
+  }
+}

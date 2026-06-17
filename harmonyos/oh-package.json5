@@ -1,0 +1,9 @@
+{
+  "name": "career-planner",
+  "version": "1.0.0",
+  "description": "职画 - 智能职业规划助手",
+  "main": "",
+  "author": "职画团队",
+  "license": "MIT",
+  "dependencies": {}
+}

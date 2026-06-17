@@ -1,0 +1,21 @@
+{
+  "app": {
+    "bundleName": "com.careerplanner.harmony",
+    "vendor": "职画团队",
+    "version": {
+      "code": 1000000,
+      "name": "1.0.0"
+    },
+    "apiVersion": {
+      "compatible": 11,
+      "target": 12
+    },
+    "icon": "$media:app_icon",
+    "label": "$string:app_name",
+    "minAPIVersion": 11,
+    "targetAPIVersion": 12,
+    "car": {
+      "minAPIVersion": 11
+    }
+  }
+}

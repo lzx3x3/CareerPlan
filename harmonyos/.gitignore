@@ -1,0 +1,17 @@
+# HarmonyOS 构建产物
+build/
+entry/build/
+*.hap
+*.app
+*.hsp
+
+# IDE
+.idea/
+*.iml
+local.properties
+.hvigor/
+oh_modules/
+
+# 系统文件
+.DS_Store
+Thumbs.db
